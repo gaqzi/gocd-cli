@@ -30,15 +30,16 @@ def version():
 
 
 setup(
-    name='gocd-cli',
+    name='gocd_cli',
     author='Björn Andersson',
     author_email='ba@sanitarium.se',
     license='MIT License',
     version=version(),
     packages=find_packages(exclude=('tests',)),
+    namespace_packages=('gocd_cli', 'gocd_cli.commands',),
     cmdclass={'test': PyTest},
     requires=[
-        'gocd',
+        'gocd_cli',
     ],
     tests_require=[
         'pytest',

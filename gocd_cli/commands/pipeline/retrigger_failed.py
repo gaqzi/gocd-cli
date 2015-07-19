@@ -1,16 +1,20 @@
 from gocd.api.response import Response
 
+__all__ = ['RetriggerFailed']
+
 
 class RetriggerFailed(object):
-    def __init__(self, pipeline, counter=None, stage=None, retrigger=None):
+    def __init__(self, server, name, counter=None, stage=None, retrigger=None):
         assert counter is None or int(counter), '"counter" needs to be an integer'
-        self.counter = counter
-        self.stage = stage
-        self.pipeline = pipeline
-
         assert retrigger in ('pipeline', 'stage', None), (
             '"retrigger" needs to be one of "pipeline" or "stage"'
         )
+
+        self.counter = counter
+        self.stage = stage
+        self.server = server
+        self.pipeline = server.pipeline(name)
+
         self.retrigger_type = retrigger or 'pipeline'
 
     def run(self):

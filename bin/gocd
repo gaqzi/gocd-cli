@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+from __future__ import unicode_literals, print_function
+
+import os.path
+import sys
+
+from gocd import Server
+from gocd_cli import run_command, list_commands, get_command_module, dasherize_name
+
+server = Server('http://localhost:8153', 'ba', 'secret')
+# pipeline = server.pipeline('Simple-with-lock')
+#
+# command = RetriggerFailed(pipeline, counter=11, stage='firstStage', retrigger='stage')
+# result = command.run()
+# print bool(result)
+
+
+def usage():
+    print('usage: {0} <command> <subcommand> [<posarg1>, ...] [--kwarg1=value, ...]'.format(
+        os.path.basename(sys.argv[0])
+    ))
+    print('\tCommands:')
+    for command in list_commands():
+        print('\t\t{0}'.format(command))
+        for subcommand in get_command_module(command).__all__:
+            print('\t\t\t{0}'.format(dasherize_name(subcommand)))
+
+
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        usage()
+        sys.exit(1)
+    else:
+        command, subcommand = sys.argv[1:3]
+        run_command(server, *sys.argv[1:])
