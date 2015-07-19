@@ -27,7 +27,7 @@ def list_commands():
     return [module[1] for module in pkgutil.walk_packages(commands.__path__)]
 
 
-def get_command_module(command):
+def get_command_module(command):  # TODO: rename this function, I just don't know to what
     return __import__('gocd_cli.commands.{0}'.format(command), fromlist=(command,))
 
 
@@ -68,11 +68,28 @@ def format_arguments(*args):
     return positional_args, kwargs
 
 
-def run_command(go_server, command, subcommand, *args):
-    command_package = get_command_module(command)
-    class_name = classify_name(subcommand)
+def get_command(go_server, command, subcommand, *args):  # TODO: Think about this, it feels ugly
+    """
 
-    Klass = getattr(command_package, class_name)
+    Raises:
+        AttributeError: when the `subcommand` doesn't exist in the
+            `command` package
+        ImportError: when the package `command` doesn't exist.
+        TypeError: when failing to initialize the `subcommand`
+    """
+    try:
+        command_package = get_command_module(command)
+    except ImportError as exc:
+        raise ImportError('gocd_cli.commands: {0}'.format(exc))
+
+    class_name = classify_name(subcommand)
+    try:
+        Klass = getattr(command_package, class_name)
+    except AttributeError as exc:
+        raise AttributeError('{0}: {1}'.format(command_package.__name__, exc))
     args, kwargs = format_arguments(*args)
 
-    return Klass(go_server, *args, **kwargs)
+    try:
+        return Klass(go_server, *args, **kwargs)
+    except TypeError as exc:
+        raise TypeError('{0}: {1}'.format(class_name, exc))
