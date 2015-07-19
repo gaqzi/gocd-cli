@@ -52,11 +52,13 @@ def format_arguments(*args):
 
     for arg in args:
         if arg.startswith('--'):
+            arg = arg[2:]
+
             if '=' in arg:
-                key, value = arg[2:].split('=')
-                kwargs[key] = value
+                key, value = arg.split('=')
+                kwargs[key.replace('-', '_')] = value
             else:
-                split_key = arg[2:]
+                split_key = arg.replace('-', '_')
         elif split_key:
             kwargs[split_key] = arg
             split_key = None
@@ -73,4 +75,4 @@ def run_command(go_server, command, subcommand, *args):
     Klass = getattr(command_package, class_name)
     args, kwargs = format_arguments(*args)
 
-    return Klass(go_server, *args)
+    return Klass(go_server, *args, **kwargs)

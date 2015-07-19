@@ -21,13 +21,18 @@ def args():
 
 
 def test_format_arguments():
-    args, kwargs = gocd_cli.format_arguments([
+    args, kwargs = gocd_cli.format_arguments(
         'name',
         '--stage=firstStage',
         '--retrigger',
         'stage',
+        '--pipeline-name=Simple-with-lock',
         'some-other',
-    ])
+    )
 
     assert args == ['name', 'some-other']
-    assert kwargs == {'stage': 'firstStage', 'retrigger': 'stage'}
+    assert kwargs == {
+        'stage': 'firstStage',
+        'retrigger': 'stage',
+        'pipeline_name': 'Simple-with-lock'
+    }
