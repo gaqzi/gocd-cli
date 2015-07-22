@@ -7,6 +7,7 @@ import pkgutil
 
 from gocd_cli import commands
 from gocd_cli.settings import Settings
+import gocd
 
 __version__ = '0.1.0'
 
@@ -126,3 +127,24 @@ def get_settings(section='gocd', settings_paths=('~/.gocd/gocd-cli.cfg', '/etc/g
     config_file = next((path for path in settings_paths if is_file_readable(path)), None)
 
     return Settings(prefix=section, section=section, filename=config_file)
+
+
+def get_go_server(settings=None):
+    """Returns a `gocd.server.Server` configured by the `settings`
+    object.
+
+    Args:
+        settings: a `gocd_cli.settings.Settings` object.
+            Default: if falsey calls `get_settings`.
+
+    Returns:
+        `gocd.server.Server` instance
+    """
+    if not settings:
+        settings = get_settings()
+
+    return gocd.Server(
+        settings.get('server'),
+        user=settings.get('user'),
+        password=settings.get('password'),
+    )

@@ -131,3 +131,21 @@ class TestGetSettings(object):
         settings = gocd_cli.get_settings(settings_paths=support_path())
 
         assert settings.get('server') == 'http://go.cd'
+
+
+class TestGetGoServer(object):
+    def test_get_server_with_a_given_settings_object(self):
+        settings = gocd_cli.get_settings(settings_paths=support_path())
+        go_server = gocd_cli.get_go_server(settings=settings)
+
+        assert go_server.host == settings.get('server')
+        assert go_server.user == settings.get('user')
+
+    def test_get_a_server_with_default_get_settings_object(self, monkeypatch):
+        settings = gocd_cli.get_settings(settings_paths=support_path('gocd-cli-alternative.cfg'))
+        monkeypatch.setattr(gocd_cli, 'get_settings', lambda *args: settings)
+
+        go_server = gocd_cli.get_go_server()
+
+        assert go_server.host == settings.get('server')
+        assert go_server.user == settings.get('user')
