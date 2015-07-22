@@ -5,6 +5,7 @@ import string
 import pkgutil
 
 from gocd_cli import commands
+from gocd_cli.settings import Settings
 
 __version__ = '0.1.0'
 
