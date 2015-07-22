@@ -25,8 +25,8 @@ class PyTest(TestCommand):
 
 
 def version():
-    import gocd
-    return gocd.__version__
+    import gocd_cli
+    return gocd_cli.__version__
 
 
 setup(
