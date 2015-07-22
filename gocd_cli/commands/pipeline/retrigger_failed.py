@@ -1,9 +1,24 @@
 from gocd.api.response import Response
+from gocd_cli.commands import BaseCommand
 
 __all__ = ['RetriggerFailed']
 
 
-class RetriggerFailed(object):
+class RetriggerFailed(BaseCommand):
+    usage = """Usage: retrigger-failed <name> [--counter] [--stage] [--retrigger]
+
+    {usage_summary}
+
+    Flags:
+        counter: the pipeline counter to check. Default: latest
+        stage: if given the pipeline will only be retriggered if
+               this stage failed
+        retrigger: possible values (pipeline, stage) default pipeline.
+                   When pipeline and there's a failed stage retriggers the pipeline.
+                   When stage and there's a failure retriggers only that stage.
+    """
+    usage_summary = 'Retriggers a pipeline/stage that has failed'
+
     def __init__(self, server, name, counter=None, stage=None, retrigger=None):
         assert counter is None or int(counter), '"counter" needs to be an integer'
         assert retrigger in ('pipeline', 'stage', None), (

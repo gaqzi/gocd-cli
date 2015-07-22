@@ -1,0 +1,2 @@
+class MissingDocumentationError(BaseException):
+    pass
