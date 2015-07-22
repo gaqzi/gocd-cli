@@ -1,5 +1,6 @@
 __import__('pkg_resources').declare_namespace(__name__)
 
+import os.path
 import re
 import string
 import pkgutil
@@ -30,6 +31,11 @@ def list_commands():
 
 def get_command_module(command):  # TODO: rename this function, I just don't know to what
     return __import__('gocd_cli.commands.{0}'.format(command), fromlist=(command,))
+
+
+def is_file_readable(path):
+    path = os.path.expanduser(path)
+    return os.path.isfile(path) and os.access(path, os.R_OK)
 
 
 def format_arguments(*args):
@@ -94,3 +100,29 @@ def get_command(go_server, command, subcommand, *args):  # TODO: Think about thi
         return Klass(go_server, *args, **kwargs)
     except TypeError as exc:
         raise TypeError('{0}: {1}'.format(class_name, exc))
+
+
+def get_settings(section='gocd', settings_paths=('~/.gocd/gocd-cli.cfg', '/etc/go/gocd-cli.cfg')):
+    """Returns a `gocd_cli.settings.Settings` configured for settings file
+
+    The settings will be read from environment variables first, then
+    it'll be read from the first config file found (if any).
+
+    Environment variables are expected to be in UPPERCASE and to be prefixed
+    with `GOCD_`.
+
+    Args:
+        section: The prefix to use for reading environment variables and the
+            name of the section in the config file. Default: gocd
+        settings_path: Possible paths for the configuration file.
+            Default: `('~/.gocd/gocd-cli.cfg', '/etc/go/gocd-cli.cfg')`
+
+    Returns:
+        `gocd_cli.settings.Settings` instance
+    """
+    if isinstance(settings_paths, basestring):
+        settings_paths = (settings_paths,)
+
+    config_file = next((path for path in settings_paths if is_file_readable(path)), None)
+
+    return Settings(prefix=section, section=section, filename=config_file)
