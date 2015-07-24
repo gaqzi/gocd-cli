@@ -27,7 +27,7 @@ class BaseCommand(object):
             usage_summary=cls.get_usage_summary(),
         )
 
-        return cls._get_or_raise('usage'.format(format_args), MissingDocumentationError)
+        return cls._get_or_raise('usage', MissingDocumentationError).format(**format_args)
 
     @classmethod
     def get_usage_summary(cls):
