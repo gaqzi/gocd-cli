@@ -35,3 +35,10 @@ class TestBaseCommandDocumentation(object):
     def test_usage_uses_usage_summary(self):
         assert FakeCommand.get_usage_summary()
         assert FakeCommand.get_usage_summary() in FakeCommand.get_usage()
+
+    def test_get_call_documentation(self):
+        documentation = FakeCommand.get_call_documentation()
+
+        assert 'fake-command' in documentation
+        assert 'fake-command <name>' in documentation
+        assert 'fake-command <name> [--limit] [--failure-mode]' in documentation

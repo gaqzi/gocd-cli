@@ -32,4 +32,21 @@ class BaseCommand(object):
 
     @classmethod
     def get_call_documentation(cls):
-        pass
+        def get_arg_names():
+            args, varargs, keywords, defaults = inspect.getargspec(cls.__init__)
+            if args[0] == 'self':
+                del args[0]
+            if args[0] == 'server':
+                del args[0]
+
+            kwargs = args[-len(defaults):]
+            positional = args[:-len(defaults)]
+
+            return positional, kwargs
+        args, kwargs = get_arg_names()
+
+        return '{command} {args} {kwargs}'.format(
+            command=dasherize_name(cls.__name__),
+            args=' '.join('<{0}>'.format(arg) for arg in args),
+            kwargs=' '.join('[--{0}]'.format(arg.replace('_', '-')) for arg in kwargs),
+        ).strip()
