@@ -5,7 +5,8 @@ __all__ = ['RetriggerFailed']
 
 
 class RetriggerFailed(BaseCommand):
-    usage = """Flags:
+    usage = """
+    Flags:
         counter: the pipeline counter to check. Default: latest
         stage: if given the pipeline will only be retriggered if
                this stage failed
@@ -13,7 +14,7 @@ class RetriggerFailed(BaseCommand):
                    When pipeline and there's a failed stage retriggers the pipeline.
                    When stage and there's a failure retriggers only that stage.
     """
-    usage_summary = 'Retriggers a pipeline/stage that has failed'
+    usage_summary = 'Retrigger a pipeline/stage that has failed'
 
     def __init__(self, server, name, counter=None, stage=None, retrigger=None):
         assert counter is None or int(counter), '"counter" needs to be an integer'

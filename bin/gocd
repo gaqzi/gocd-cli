@@ -14,10 +14,18 @@ def usage():
     ))
     print('Commands:')
     for command in list_commands():
-        print('{0:3}{1}'.format('', command))
         module = get_command_module(command)
-        for subcommand in module.__all__:
-            cmd = getattr(module, subcommand)
+        print_command_documentation(command, module)
+
+
+def print_command_documentation(command, module, extended_help=False):
+    print('{0:3}{1}'.format('', command))
+    for subcommand in module.__all__:
+        cmd = getattr(module, subcommand)
+        if extended_help:
+            for line in cmd.get_usage().split('\n'):
+                print('{0:7}{1}'.format('', line))
+        else:
             print('{0:7}{1}: {2}'.format('', dasherize_name(subcommand), cmd.get_usage_summary()))
 
 
@@ -25,6 +33,10 @@ if __name__ == '__main__':
     if len(sys.argv) < 3:
         usage()
         sys.exit(1)
+    elif sys.argv[1] == 'help':
+        module_name = sys.argv[2]
+        module = __import__('gocd_cli.commands', fromlist=((module_name),))
+        print_command_documentation(module_name, getattr(module, module_name), True)
     else:
         command, subcommand = sys.argv[1:3]
         server = get_go_server()

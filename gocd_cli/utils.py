@@ -27,7 +27,7 @@ def list_commands():
 
 
 def get_command_module(command):  # TODO: rename this function, I just don't know to what
-    return __import__('gocd_cli.commands.{0}'.format(command), fromlist=(command,))
+    return __import__('gocd_cli.commands.{0}'.format(command), fromlist=(str(command),))
 
 
 def is_file_readable(path):

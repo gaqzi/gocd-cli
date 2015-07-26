@@ -1,4 +1,3 @@
-from collections import defaultdict
 import inspect
 
 from gocd_cli.utils import dasherize_name
@@ -24,7 +23,7 @@ class BaseCommand(object):
         return '{call_documentation}\n\n{usage_summary}\n\n{usage}\n'.format(
             call_documentation=cls.get_call_documentation(),
             usage_summary=cls.get_usage_summary(),
-            usage=usage,
+            usage=inspect.cleandoc(usage),
         )
 
     @classmethod
@@ -46,7 +45,7 @@ class BaseCommand(object):
             return positional, kwargs
         args, kwargs = get_arg_names()
 
-        return 'Usage: {command} {args} {kwargs}'.format(
+        return '{command} {args} {kwargs}'.format(
             command=dasherize_name(cls.__name__),
             args=' '.join('<{0}>'.format(arg) for arg in args),
             kwargs=' '.join('[--{0}]'.format(arg.replace('_', '-')) for arg in kwargs),
