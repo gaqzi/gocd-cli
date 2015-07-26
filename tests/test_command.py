@@ -1,9 +1,10 @@
 import pytest
 
-from gocd_cli.commands import BaseCommand
+from gocd_cli.command import BaseCommand
 from gocd_cli.exceptions import MissingDocumentationError
 
-class FakeCommandClass(BaseCommand):
+
+class FakeCommand(BaseCommand):
     usage_summary = "I'm merely an example of things to come"
     usage = """
     {usage_summary}
@@ -32,5 +33,5 @@ class TestBaseCommandDocumentation(object):
         assert 'Command "BaseCommand" has no "usage" string set.' in str(exc)
 
     def test_usage_uses_usage_summary(self):
-        assert FakeCommandClass.get_usage_summary()
-        assert FakeCommandClass.get_usage_summary() in FakeCommandClass.get_usage()
+        assert FakeCommand.get_usage_summary()
+        assert FakeCommand.get_usage_summary() in FakeCommand.get_usage()

@@ -5,7 +5,7 @@ from __future__ import unicode_literals, print_function
 import os.path
 import sys
 
-from gocd_cli import get_command, list_commands, get_command_module, dasherize_name, get_go_server
+from gocd_cli.utils import get_command, list_commands, get_command_module, dasherize_name, get_go_server
 
 
 def usage():

@@ -1,5 +1,5 @@
 from gocd.api.response import Response
-from gocd_cli.commands import BaseCommand
+from gocd_cli.command import BaseCommand
 
 __all__ = ['RetriggerFailed']
 
