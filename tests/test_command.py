@@ -7,8 +7,6 @@ from gocd_cli.exceptions import MissingDocumentationError
 class FakeCommand(BaseCommand):
     usage_summary = "I'm merely an example of things to come"
     usage = """
-    {usage_summary}
-
     Args:
         something: something else
         some-more: the other thing
@@ -35,6 +33,9 @@ class TestBaseCommandDocumentation(object):
     def test_usage_uses_usage_summary(self):
         assert FakeCommand.get_usage_summary()
         assert FakeCommand.get_usage_summary() in FakeCommand.get_usage()
+
+    def test_usage_uses_call_documentation(self):
+        assert 'fake-command <name> [--limit] [--failure-mode]' in FakeCommand.get_usage()
 
     def test_get_call_documentation(self):
         documentation = FakeCommand.get_call_documentation()

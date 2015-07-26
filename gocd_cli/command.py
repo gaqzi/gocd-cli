@@ -19,12 +19,13 @@ class BaseCommand(object):
 
     @classmethod
     def get_usage(cls):
-        format_args = defaultdict(str)
-        format_args.update(
-            usage_summary=cls.get_usage_summary(),
-        )
+        usage = cls._get_or_raise('usage', MissingDocumentationError)
 
-        return cls._get_or_raise('usage', MissingDocumentationError).format(**format_args)
+        return '{call_documentation}\n\n{usage_summary}\n\n{usage}\n'.format(
+            call_documentation=cls.get_call_documentation(),
+            usage_summary=cls.get_usage_summary(),
+            usage=usage,
+        )
 
     @classmethod
     def get_usage_summary(cls):
@@ -45,7 +46,7 @@ class BaseCommand(object):
             return positional, kwargs
         args, kwargs = get_arg_names()
 
-        return '{command} {args} {kwargs}'.format(
+        return 'Usage: {command} {args} {kwargs}'.format(
             command=dasherize_name(cls.__name__),
             args=' '.join('<{0}>'.format(arg) for arg in args),
             kwargs=' '.join('[--{0}]'.format(arg.replace('_', '-')) for arg in kwargs),

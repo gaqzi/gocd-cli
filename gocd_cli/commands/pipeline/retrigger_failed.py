@@ -5,11 +5,7 @@ __all__ = ['RetriggerFailed']
 
 
 class RetriggerFailed(BaseCommand):
-    usage = """Usage: retrigger-failed <name> [--counter] [--stage] [--retrigger]
-
-    {usage_summary}
-
-    Flags:
+    usage = """Flags:
         counter: the pipeline counter to check. Default: latest
         stage: if given the pipeline will only be retriggered if
                this stage failed
