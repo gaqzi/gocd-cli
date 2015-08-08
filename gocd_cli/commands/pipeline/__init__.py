@@ -2,7 +2,7 @@ from gocd_cli.command import BaseCommand
 
 from .retrigger_failed import RetriggerFailed
 
-__all__ = ['RetriggerFailed', 'Trigger', 'Unlock']
+__all__ = ['Pause', 'RetriggerFailed', 'Trigger', 'Unlock']
 
 
 def unlock_pipeline(pipeline):
@@ -42,3 +42,19 @@ class Unlock(BaseCommand):
 
     def run(self):
         return unlock_pipeline(self.pipeline)
+
+
+class Pause(BaseCommand):
+    usage = ' '
+    usage_summary = 'Pauses the named pipeline'
+
+    def __init__(self, server, name):
+        self.pipeline = server.pipeline(name)
+
+    def run(self):
+        response = self.pipeline.status()
+
+        if response and not response['paused']:
+            return self.pipeline.pause()
+        else:
+            return False
