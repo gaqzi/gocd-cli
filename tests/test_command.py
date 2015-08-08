@@ -16,6 +16,14 @@ class FakeCommand(BaseCommand):
         pass
 
 
+class FakeCommandNoKwargs(BaseCommand):
+    usage = 'Something'
+    usage_summary = 'I shall perform miracles'
+
+    def __init__(self, server, name):
+        pass
+
+
 class TestBaseCommandDocumentation(object):
     def test_missing_usage_summary_raises_document_missing_error(self):
         with pytest.raises(MissingDocumentationError) as exc:
@@ -43,3 +51,9 @@ class TestBaseCommandDocumentation(object):
         assert 'fake-command' in documentation
         assert 'fake-command <name>' in documentation
         assert 'fake-command <name> [--limit] [--failure-mode]' in documentation
+
+    def test_get_call_documentation_no_defaults(self):
+        documentation = FakeCommandNoKwargs.get_call_documentation()
+
+        assert 'fake-command-no-kwargs <name>' in documentation
+

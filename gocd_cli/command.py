@@ -39,8 +39,8 @@ class BaseCommand(object):
             if args[0] == 'server':
                 del args[0]
 
-            kwargs = args[-len(defaults):]
-            positional = args[:-len(defaults)]
+            kwargs = args[-len(defaults):] if defaults else []
+            positional = args[:-len(kwargs)] if kwargs else args
 
             return positional, kwargs
         args, kwargs = get_arg_names()
