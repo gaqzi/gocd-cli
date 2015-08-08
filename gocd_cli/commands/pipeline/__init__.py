@@ -58,3 +58,19 @@ class Pause(BaseCommand):
             return self.pipeline.pause()
         else:
             return False
+
+
+class Unpause(BaseCommand):
+    usage = ' '
+    usage_summary = 'Unpauses the named pipeline'
+
+    def __init__(self, server, name):
+        self.pipeline = server.pipeline(name)
+
+    def run(self):
+        response = self.pipeline.status()
+
+        if response and response['paused']:
+            return self.pipeline.unpause()
+        else:
+            return False

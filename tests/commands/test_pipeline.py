@@ -4,7 +4,7 @@ from mock import MagicMock
 
 from gocd import Server
 from gocd.api import Pipeline
-from gocd_cli.commands.pipeline import Pause, Trigger, Unlock
+from gocd_cli.commands.pipeline import Pause, Trigger, Unlock, Unpause
 
 
 @pytest.fixture
@@ -55,7 +55,7 @@ class TestUnlock(object):
 
 
 class TestPause(object):
-    def test_normal_run(self, go_server):
+    def test_pauses_when_unpaused(self, go_server):
         cmd = Pause(go_server, 'Simple-Pipeline')
         cmd.pipeline.status.return_value = dict(paused=False)
         cmd.run()
@@ -68,3 +68,19 @@ class TestPause(object):
         cmd.run()
 
         assert not cmd.pipeline.pause.called
+
+
+class TestUnpause(object):
+    def test_unpauses_when_paused(self, go_server):
+        cmd = Unpause(go_server, 'Simple-Pipeline')
+        cmd.pipeline.status.return_value = dict(paused=True)
+        cmd.run()
+
+        cmd.pipeline.unpause.assert_called_with()
+
+    def test_doesnt_run_if_already_unpaused(self, go_server):
+        cmd = Unpause(go_server, 'Simple-Pipeline')
+        cmd.pipeline.status.return_value = dict(paused=False)
+        cmd.run()
+
+        assert not cmd.pipeline.unpause.called
