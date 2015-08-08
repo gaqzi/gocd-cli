@@ -22,6 +22,13 @@ class TestTrigger(object):
         go_server.pipeline.assert_called_once_with('Simple-Pipeline')
         cmd.pipeline.schedule.assert_called_once_with()
 
+    def test_tries_to_unlock_the_pipeline_if_asked(self, go_server):
+        cmd = Trigger(go_server, 'Simple-Pipeline', unlock=True)
+        cmd.pipeline.status.return_value = dict(locked=True)
+        cmd.run()
+
+        cmd.pipeline.unlock.assert_called_with()
+
 
 class TestUnlock(object):
     @pytest.fixture(autouse=True)
