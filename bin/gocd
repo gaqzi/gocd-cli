@@ -19,18 +19,25 @@ def usage():
 
 
 def print_command_documentation(command, module, extended_help=False):
+    first = True
     print('{0:3}{1}'.format('', command))
     for subcommand in module.__all__:
         cmd = getattr(module, subcommand)
+
         if extended_help:
+            if not first:
+                print('{0:7}--'.format(''))
+
             for line in cmd.get_usage().split('\n'):
-                print('{0:7}{1}'.format('', line))
+                print('{0:7}{1}'.format('', line.rstrip()))
         else:
             print('{0:7}{1}: {2}'.format(
                 '',
                 utils.dasherize_name(subcommand),
                 cmd.get_usage_summary()
             ))
+
+        first = False
 
 
 if __name__ == '__main__':
