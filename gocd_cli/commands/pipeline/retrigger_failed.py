@@ -66,7 +66,7 @@ class RetriggerFailed(BaseCommand):
             return self.pipeline.trigger()
         else:
             self.pipeline.server.add_logged_in_session(response)
-            return Response.from_request(self.pipeline.server.post(
+            return Response._from_request(self.pipeline.server.post(
                 'go/run/{pipeline}/{counter}/{stage}'.format(
                     pipeline=self.pipeline.name,
                     counter=self.counter,
