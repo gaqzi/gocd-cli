@@ -45,10 +45,10 @@ def format_arguments(*args):
     * --argument value
 
     Args:
-        *args: a list of arguments
+      *args (list): a list of arguments
 
     Returns:
-        ([positional_args], {kwargs})
+      ([positional_args], {kwargs})
     """
     positional_args = []
     kwargs = {}
@@ -76,10 +76,10 @@ def get_command(go_server, command, subcommand, *args):  # TODO: Think about thi
     """
 
     Raises:
-        AttributeError: when the `subcommand` doesn't exist in the
-            `command` package
-        ImportError: when the package `command` doesn't exist.
-        TypeError: when failing to initialize the `subcommand`
+      AttributeError: when the `subcommand` doesn't exist in the
+        `command` package
+      ImportError: when the package `command` doesn't exist.
+      TypeError: when failing to initialize the `subcommand`
     """
     try:
         command_package = get_command_module(command)
@@ -109,10 +109,10 @@ def get_settings(section='gocd', settings_paths=('~/.gocd/gocd-cli.cfg', '/etc/g
     with `GOCD_`.
 
     Args:
-        section: The prefix to use for reading environment variables and the
-            name of the section in the config file. Default: gocd
-        settings_path: Possible paths for the configuration file.
-            Default: `('~/.gocd/gocd-cli.cfg', '/etc/go/gocd-cli.cfg')`
+      section: The prefix to use for reading environment variables and the
+        name of the section in the config file. Default: gocd
+      settings_path: Possible paths for the configuration file.
+        Default: `('~/.gocd/gocd-cli.cfg', '/etc/go/gocd-cli.cfg')`
 
     Returns:
         `gocd_cli.settings.Settings` instance
@@ -126,15 +126,15 @@ def get_settings(section='gocd', settings_paths=('~/.gocd/gocd-cli.cfg', '/etc/g
 
 
 def get_go_server(settings=None):
-    """Returns a `gocd.server.Server` configured by the `settings`
+    """Returns a `gocd.Server` configured by the `settings`
     object.
 
     Args:
-        settings: a `gocd_cli.settings.Settings` object.
-            Default: if falsey calls `get_settings`.
+      settings: a `gocd_cli.settings.Settings` object.
+        Default: if falsey calls `get_settings`.
 
     Returns:
-        `gocd.server.Server` instance
+      gocd.Server: a configured gocd.Server instance
     """
     if not settings:
         settings = get_settings()
