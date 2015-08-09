@@ -1,6 +1,26 @@
 A command line interface for common `Go Continuous Delivery`_ tasks
 ===================================================================
 
+.. image:: https://coveralls.io/repos/gaqzi/py-gocd-cli/badge.svg?branch=master&service=github
+   :target: https://coveralls.io/github/gaqzi/py-gocd-cli?branch=master
+   :alt: Coverage Status
+
+.. image:: https://snap-ci.com/gaqzi/py-gocd-cli/branch/master/build_image
+   :target: https://snap-ci.com/gaqzi/py-gocd-cli/branch/master
+   :alt: Build Status
+
+.. image:: https://readthedocs.org/projects/py-gocd-cli/badge/?version=latest
+   :target: https://readthedocs.org/projects/py-gocd-cli/?badge=latest
+   :alt: Documentation Status
+
+.. image:: https://pypip.in/version/gocd-cli/badge.png
+   :target: https://pypi.python.org/pypi/gocd-cli/
+   :alt: Latest Version
+
+.. image:: https://pypip.in/download/gocd-cli/badge.png
+   :target: https://pypi.python.org/pypi/gocd-cli/
+   :alt: Downloads
+
 For work I and colleagues have for the last nine months been writing a lot of
 different small shell scripts with curl that interacts with the Go api.
  
