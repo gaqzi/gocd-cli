@@ -141,12 +141,12 @@ The way the cli searches for commands is quite straightforward:
 * Any --parameters gets the dashes stripped and sent as keyword arguments
 
 To make it work this way there's a pattern to keep to. For each package the
-`__init__.py` file will have to provide all the subcommands in the `__all__`
+``__init__.py`` file will have to provide all the subcommands in the ``__all__``
 variable. Each command is a class and it's the name of those classes that are in
-the `__all__` variable.
+the ``__all__`` variable.
 
 The subcommands will on the command line be divided by dashes, meaning that
-`RetriggerFailed` will become `retrigger-failed` on the command line.
+``RetriggerFailed`` will become ``retrigger-failed`` on the command line.
 
 .. code-block:: shell
 
