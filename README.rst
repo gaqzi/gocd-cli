@@ -48,6 +48,43 @@ like.
                     [--stage only retrigger if this stage failed] 
                     [--retrigger stage|pipeline, default pipeline] 
                     
+
+Configuration
+-------------
+
+This script has been prepared to be run two situations:
+
+1. From your local machine
+2. From inside of Go
+
+Because of this the configuration is handled by a config file and
+it can be overridden by environment variables.
+
+The current options are:
+
+:server: The server to connect to, example: http://go.example.com:8153/
+:user: The user to login as
+:password: The corresponding password
+
+The configuration file is stored in ``~/.gocd/gocd-cli.cfg`` and is an ini file.
+Example:
+
+.. code-block:: ini
+
+  [gocd]
+  server = http://localhost:8153/
+  user = admin
+  password = badger
+
+The environment variables are prefixed with ``GOCD_`` and always ALL CAPS.
+Example:
+
+.. code-block:: shell
+
+  GOCD_SERVER=http://loaclhost:8153/
+  GOCD_USER=admin
+  GOCD_PASSWORD=badger
+
 Help
 ----
 
