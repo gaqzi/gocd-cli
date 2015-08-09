@@ -13,6 +13,7 @@ def usage():
         os.path.basename(sys.argv[0])
     ))
     print('Commands:')
+    print('{0:3}{1}'.format('', 'help <command> [subcommand]'))
     for command in utils.list_commands():
         module = utils.get_command_module(command)
         print_command_documentation(command, module)

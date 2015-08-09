@@ -26,6 +26,38 @@ like.
     $ gocd pipeline retrigger-failed <name> [--counter default last] 
                     [--stage only retrigger if this stage failed] 
                     [--retrigger stage|pipeline, default pipeline] 
+                    
+Help
+----
+
+The commands should be mostly self-documenting in how they are defined,
+which is made available through the `help` command.
+
+.. code-block:: shell
+
+    $ gocd
+    usage: gocd <command> <subcommand> [<posarg1>, ...] [--kwarg1=value, ...]
+    Commands:
+       pipeline
+          pause: Pauses the named pipeline
+          retrigger-failed: Retrigger a pipeline/stage that has failed
+          trigger: Triggers the named pipeline
+          unlock: Unlocks the named pipeline if it's currently locked
+          unpause: Unpauses the named pipeline
+          
+    $ gocd help pipeline retrigger-failed
+    retrigger-failed <name> [--counter] [--stage] [--retrigger]
+
+    Retrigger a pipeline/stage that has failed
+
+    Flags:
+       counter: the pipeline counter to check. Default: latest
+       stage: if given the pipeline will only be retriggered if
+         this stage failed
+       retrigger: possible values (pipeline, stage) default pipeline.
+         When pipeline and there's a failed stage retriggers the pipeline.
+         When stage and there's a failure retriggers only that stage.
+    
 
 Writing your own commands
 -------------------------
