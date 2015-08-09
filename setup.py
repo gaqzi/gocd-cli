@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
+import os
 import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
@@ -28,20 +29,24 @@ def version():
     import gocd_cli
     return gocd_cli.__version__
 
+README = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
 
 setup(
     name='gocd_cli',
     author='Björn Andersson',
     author_email='ba@sanitarium.se',
     license='MIT License',
+    description='A CLI client for interacting with Go Continuous Delivery',
+    long_description=README,
     version=version(),
     packages=find_packages(exclude=('tests',)),
     namespace_packages=('gocd_cli', 'gocd_cli.commands',),
     cmdclass={'test': PyTest},
-    requires=[
-        'gocd_cli',
+    install_requires=[
+        'gocd>=0.7,<1.0',
     ],
     tests_require=[
         'pytest',
+        'mock==1.0.1'
     ],
 )

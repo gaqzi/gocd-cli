@@ -1,1 +1,6 @@
+# gocd>=0.7,<1.0
+-e git://github.com/gaqzi/py-gocd.git#egg=gocd
+tox
 mock==1.0.1
+pytest
+pytest-cov
