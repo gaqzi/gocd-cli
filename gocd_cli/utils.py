@@ -121,6 +121,8 @@ def get_settings(section='gocd', settings_paths=('~/.gocd/gocd-cli.cfg', '/etc/g
         settings_paths = (settings_paths,)
 
     config_file = next((path for path in settings_paths if is_file_readable(path)), None)
+    if config_file:
+        config_file = os.path.expanduser(config_file)
 
     return Settings(prefix=section, section=section, filename=config_file)
 

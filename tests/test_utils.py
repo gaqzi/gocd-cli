@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from mock import MagicMock
+from mock import MagicMock, patch
 
 from gocd import Server
 from gocd.api import Pipeline
@@ -104,6 +104,20 @@ class TestGetSettings(object):
         settings = gocd_cli.utils.get_settings()
 
         assert settings.get('server') is None
+
+    def test_get_settings_from_config_file_that_had_user_expanded(self, monkeypatch):
+        monkeypatch.delenv('GOCD_SERVER', raising=False)
+        monkeypatch.setattr(os.path, 'isfile', lambda p: True)
+        monkeypatch.setattr(os, 'access', lambda p, _: True)
+
+        with patch('gocd_cli.utils.Settings') as settings_mock:
+            config_file = '~/.gocd/gocd-cli.cfg'
+            gocd_cli.utils.get_settings(settings_paths=config_file)
+            settings_mock.assert_called_with(
+                section='gocd',
+                prefix='gocd',
+                filename=os.path.expanduser(config_file)
+            )
 
     def test_get_settings_from_first_config_file(self, monkeypatch):
         monkeypatch.delenv('GOCD_SERVER', raising=False)
