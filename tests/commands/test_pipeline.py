@@ -30,6 +30,13 @@ class TestTrigger(object):
 
         cmd.pipeline.unlock.assert_called_with()
 
+    def test_doesnt_try_to_unlock_if_unlock_is_not_true(self, go_server):
+        cmd = Trigger(go_server, 'Simple-Pipeline', unlock='false')
+        cmd.pipeline.status.return_value = dict(locked=True)
+        cmd.run()
+
+        assert not cmd.pipeline.unlock.called
+
 
 class TestUnlock(object):
     @pytest.fixture(autouse=True)

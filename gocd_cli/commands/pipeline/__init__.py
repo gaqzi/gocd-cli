@@ -24,7 +24,7 @@ class Trigger(BaseCommand):
 
     def __init__(self, server, name, unlock=False):
         self.pipeline = server.pipeline(name)
-        self.unlock = unlock
+        self.unlock = str(unlock).lower().strip() == 'true'
 
     def run(self):
         if self.unlock:
