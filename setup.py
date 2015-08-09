@@ -32,7 +32,7 @@ def version():
 README = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
 
 setup(
-    name='gocd_cli',
+    name='gocd-cli',
     author='Björn Andersson',
     author_email='ba@sanitarium.se',
     license='MIT License',
