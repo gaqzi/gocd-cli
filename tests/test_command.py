@@ -56,4 +56,3 @@ class TestBaseCommandDocumentation(object):
         documentation = FakeCommandNoKwargs.get_call_documentation()
 
         assert 'fake-command-no-kwargs <name>' in documentation
-

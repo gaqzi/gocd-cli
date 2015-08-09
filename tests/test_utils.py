@@ -10,7 +10,7 @@ import gocd_cli.utils
 
 @pytest.fixture
 def args_positional():
-    return ('pipeline', 'retrigger-failed', 'Simple-with-lock')
+    return 'pipeline', 'retrigger-failed', 'Simple-with-lock'
 
 
 @pytest.fixture
@@ -33,8 +33,8 @@ def go_server():
     return server
 
 
-def support_path(file='gocd-cli.cfg'):
-    return os.path.join(os.path.dirname(__file__), 'support', file)
+def support_path(config_file='gocd-cli.cfg'):
+    return os.path.join(os.path.dirname(__file__), 'support', config_file)
 
 
 def test_format_arguments():
@@ -156,7 +156,9 @@ class TestGetGoServer(object):
         assert go_server.user == settings.get('user')
 
     def test_get_a_server_with_default_get_settings_object(self, monkeypatch):
-        settings = gocd_cli.utils.get_settings(settings_paths=support_path('gocd-cli-alternative.cfg'))
+        settings = gocd_cli.utils.get_settings(
+            settings_paths=support_path('gocd-cli-alternative.cfg')
+        )
         monkeypatch.setattr(gocd_cli.utils, 'get_settings', lambda *args: settings)
 
         go_server = gocd_cli.utils.get_go_server()

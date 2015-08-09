@@ -29,7 +29,7 @@ def ini_settings():
 @pytest.fixture
 def ini_settings_no_section():
     return IniSettings(
-        section='nonexistant',
+        section='nonexistent',
         filename=path.join(path.dirname(__file__), 'support/gocd-cli.cfg')
     )
 
@@ -44,11 +44,11 @@ def test_reads_configuration_key_from_ini(ini_settings):
 
 
 def test_reads_non_existant_key_from_ini_returns_none(ini_settings):
-    assert ini_settings.get('nonexistant') is None
+    assert ini_settings.get('nonexistent') is None
 
 
-def test_reads_from_nonexistant_ini_section_returns_none(ini_settings_no_section):
-    assert ini_settings_no_section.get('nonexistant') is None
+def test_reads_from_nonexistent_ini_section_returns_none(ini_settings_no_section):
+    assert ini_settings_no_section.get('nonexistent') is None
 
 
 def test_ini_section_is_made_lowercase():
@@ -75,9 +75,9 @@ def test_configuration_prefix_is_made_uppercase(monkeypatch):
 
 
 def test_reads_non_existant_key_from_env_returns_none(env_settings, monkeypatch):
-    monkeypatch.delenv('GOCD_NONEXISTANT', raising=False)
+    monkeypatch.delenv('GOCD_NONEXISTENT', raising=False)
 
-    assert env_settings.get('nonexistant') is None
+    assert env_settings.get('nonexistent') is None
 
 
 def test_settings_should_read_env_first(settings, monkeypatch):
@@ -93,6 +93,6 @@ def test_settings_should_fallback_to_ini_when_nothing_in_env(settings, monkeypat
 
 
 def test_settings_should_return_none_when_nothing_anywhere(settings, monkeypatch):
-    monkeypatch.delenv('GOCD_NONEXISTANT', raising=False)
+    monkeypatch.delenv('GOCD_NONEXISTENT', raising=False)
 
-    assert settings.get('nonexistant') is None
+    assert settings.get('nonexistent') is None
