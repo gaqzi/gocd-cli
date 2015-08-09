@@ -9,10 +9,6 @@ A command line interface for common `Go Continuous Delivery`_ tasks
    :target: https://snap-ci.com/gaqzi/py-gocd-cli/branch/master
    :alt: Build Status
 
-.. image:: https://readthedocs.org/projects/py-gocd-cli/badge/?version=latest
-   :target: https://readthedocs.org/projects/py-gocd-cli/?badge=latest
-   :alt: Documentation Status
-
 .. image:: https://img.shields.io/pypi/v/gocd-cli.svg
    :target: https://pypi.python.org/pypi/gocd-cli/
    :alt: Latest Version
