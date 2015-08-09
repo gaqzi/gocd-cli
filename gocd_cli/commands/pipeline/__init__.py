@@ -2,7 +2,7 @@ from gocd_cli.command import BaseCommand
 
 from .retrigger_failed import RetriggerFailed
 
-__all__ = ['Pause', 'RetriggerFailed', 'Trigger', 'Unlock']
+__all__ = ['Pause', 'RetriggerFailed', 'Trigger', 'Unlock', 'Unpause']
 
 
 def unlock_pipeline(pipeline):
