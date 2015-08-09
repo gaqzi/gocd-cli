@@ -19,8 +19,11 @@ A command line interface for common `Go Continuous Delivery`_ tasks
    
 .. image:: https://img.shields.io/pypi/pyversions/gocd-cli.svg
    :target: https://pypi.python.org/pypi/gocd-cli/
-   :alt: Python versions
+   :alt: Python versions   
 
+.. image:: https://img.shields.io/pypi/status/gocd-cli.svg
+   :target: https://pypi.python.org/pypi/gocd-cli/
+   :alt: Package status
 
 For work I and colleagues have for the last nine months been writing a lot of
 different small shell scripts with curl that interacts with the Go api.
@@ -30,6 +33,16 @@ the same work and discovery every time we need to do it.
 
 The goal of this project is to make these and similar tasks super simple to do
 and repeatable without having to write a so-so reliable bash script.
+
+Note
+----
+
+This is still early in the development and a bit rough around the edges.
+Any bug reports, feature suggestions and so on are greatly appreciated. :)
+
+With that said the current intention is to add support for all the API
+endpoints that make sense from a CLI perspective. And also to convert
+some of my old shell scripts to be reusable here.
 
 Usage
 -----
