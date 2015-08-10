@@ -20,7 +20,7 @@ class TestTrigger(object):
         cmd.run()
 
         go_server.pipeline.assert_called_once_with('Simple-Pipeline')
-        cmd.pipeline.schedule.assert_called_once_with()
+        cmd.pipeline.schedule.assert_called_once_with(variables=None)
 
     def test_tries_to_unlock_the_pipeline_if_asked(self, go_server):
         cmd = Trigger(go_server, 'Simple-Pipeline', unlock=True)
@@ -35,6 +35,14 @@ class TestTrigger(object):
         cmd.run()
 
         assert not cmd.pipeline.unlock.called
+
+    def test_trigger_with_variables(self, go_server):
+        cmd = Trigger(go_server, 'Keymaker', variables='PIPELINE=The-Matrix')
+        cmd.run()
+
+        cmd.pipeline.schedule.assert_called_once_with(
+            variables=dict(PIPELINE='The-Matrix')
+        )
 
 
 class TestUnlock(object):

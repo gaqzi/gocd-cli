@@ -43,7 +43,7 @@ def test_format_arguments():
         '--stage=firstStage',
         '--retrigger',
         'stage',
-        '--pipeline-name=Simple-with-lock',
+        '--pipeline-name=Simple-with-lock=and-then-some',
         'some-other',
     )
 
@@ -51,7 +51,7 @@ def test_format_arguments():
     assert kwargs == {
         'stage': 'firstStage',
         'retrigger': 'stage',
-        'pipeline_name': 'Simple-with-lock'
+        'pipeline_name': 'Simple-with-lock=and-then-some'
     }
 
 

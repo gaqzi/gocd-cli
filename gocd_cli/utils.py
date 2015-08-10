@@ -59,7 +59,7 @@ def format_arguments(*args):
             arg = arg[2:]
 
             if '=' in arg:
-                key, value = arg.split('=')
+                key, value = arg.split('=', 1)
                 kwargs[key.replace('-', '_')] = value
             else:
                 split_key = arg.replace('-', '_')
