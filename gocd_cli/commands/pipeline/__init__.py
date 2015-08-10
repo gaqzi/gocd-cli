@@ -22,19 +22,24 @@ class Trigger(BaseCommand):
         variables: A comma separated list of key=value pairs that will
           be passed to the pipeline.
           Example: SHARED_SECRET=Mellon,SECOND=Really Im first
+        secure_variables: A comma separated list of key=value pairs.
     """
     usage_summary = 'Triggers the named pipeline'
 
-    def __init__(self, server, name, unlock=False, variables=None):
+    def __init__(self, server, name, unlock=False, variables=None, secure_variables=None):
         self.pipeline = server.pipeline(name)
         self.unlock = str(unlock).lower().strip() == 'true'
         self.variables = self._convert_to_dict(variables)
+        self.secure_variables = self._convert_to_dict(secure_variables)
 
     def run(self):
         if self.unlock:
             unlock_pipeline(self.pipeline)
 
-        return self.pipeline.schedule(variables=self.variables)
+        return self.pipeline.schedule(
+            variables=self.variables,
+            secure_variables=self.secure_variables
+        )
 
     def _convert_to_dict(self, args):
         # XXX: I would like to find a better way of dealing with this,
