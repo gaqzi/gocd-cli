@@ -36,6 +36,7 @@ setup(
     author='Björn Andersson',
     author_email='ba@sanitarium.se',
     license='MIT License',
+    url='https://github.com/gaqzi/gocd-cli/',
     description='A CLI client for interacting with Go Continuous Delivery',
     long_description=README,
     version=version(),
