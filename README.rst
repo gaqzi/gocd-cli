@@ -1,8 +1,8 @@
 A command line interface for common `Go Continuous Delivery`_ tasks
 ===================================================================
 
-.. image:: https://coveralls.io/repos/gaqzi/py-gocd-cli/badge.svg?branch=master&service=github
-   :target: https://coveralls.io/github/gaqzi/py-gocd-cli?branch=master
+.. image:: http://codecov.io/github/gaqzi/py-gocd-cli/coverage.svg?branch=master 
+   :target: http://codecov.io/github/gaqzi/py-gocd-cli?branch=master
    :alt: Coverage Status
 
 .. image:: https://snap-ci.com/gaqzi/py-gocd-cli/branch/master/build_image
