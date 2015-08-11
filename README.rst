@@ -26,23 +26,26 @@ A command line interface for common `Go Continuous Delivery`_ tasks
    :alt: Package status
 
 For work I and colleagues have for the last nine months been writing a lot of
-different small shell scripts with curl that interacts with the Go api.
+different small shell scripts with curl that interacts with the Go API.
  
-Most of them are quick works but they aren't very robust, and we keep repeating
-the same work and discovery every time we need to do it.
+Most of them are quick n' dirty scripts that aren't very robust, and because
+they're written in the mindset of the now we just end up copy+pasting it
+everywhere. As well as figuring out what API endpoints are available, how they
+work and so on.
 
-The goal of this project is to make these and similar tasks super simple to do
-and repeatable without having to write a so-so reliable bash script.
+The goal of this project is to make these and similar tasks super simple,
+without having to write a so-so reliable bash script. And for the most common
+things just one invocation.
 
 Note
 ----
 
 This is still early in the development and a bit rough around the edges.
-Any bug reports, feature suggestions and so on are greatly appreciated. :)
+Any bug reports, feature suggestions, etc are greatly appreciated. :)
 
-With that said the current intention is to add support for all the API
-endpoints that make sense from a CLI perspective. And also to convert
-some of my old shell scripts to be reusable here.
+I'm planning to add support for all the API endpoints that make sense from a CLI
+perspective. And also to handle some of the scenarios where we ended up writing
+shell scripts.
 
 Installation and usage
 ----------------------
