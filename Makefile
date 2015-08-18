@@ -49,3 +49,6 @@ upload-package: test lint clean
 	pip install twine wheel
 	python setup.py sdist bdist_wheel
 	twine upload dist/*
+
+rpm: clean
+	python setup.py bdist_rpm --requires 'Python(gocd)' --provides 'Python(gocd-cli)'
