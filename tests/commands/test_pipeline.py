@@ -1,9 +1,12 @@
+import json
+import os
 import pytest
 from mock import MagicMock
 
 from gocd import Server
 from gocd.api import Pipeline
-from gocd_cli.commands.pipeline import Pause, Trigger, Unlock, Unpause
+import time
+from gocd_cli.commands.pipeline import Monitor, Pause, Trigger, Unlock, Unpause
 
 
 @pytest.fixture
@@ -108,3 +111,100 @@ class TestUnpause(object):
         cmd.run()
 
         assert not cmd.pipeline.unpause.called
+
+
+class TestMonitor(object):
+    def _pipeline(self, result='Unknown', job_state='Scheduled', scheduled_minutes_back=20):
+        scheduled_date = time.time() - (60 * scheduled_minutes_back)
+
+        return {
+            'stages': [
+                {
+                    'scheduled': True,
+                    'jobs': [
+                        {
+                            'id': 1,
+                            'state': job_state,
+                            'result': result,
+                            'scheduled_date': scheduled_date * 1000,
+                            'name': 'defaultJob'
+                        }
+                    ],
+                    'name': 'defaultStage',
+                    'can_run': False,
+                    'operate_permission': True,
+                    'approval_type': 'success',
+                    'counter': '1',
+                    'approved_by': 'changes',
+                    'result': result,
+                    'rerun_of_counter': None,
+                    'id': 1
+                }
+            ],
+            'result': result
+        }
+
+    def _scheduled_pipeline(self, scheduled_minutes_back=20):
+        return self._pipeline(result='Unknown', scheduled_minutes_back=scheduled_minutes_back)
+
+    def _green_pipeline(self):
+        return self._pipeline(result='Passed')
+
+    def _building_pipeline(self):
+        return self._pipeline(result='Unknown', job_state='Building')
+
+    def _red_pipeline(self):
+        return self._pipeline(result='Failed')
+
+    def test_determines_pipeline_has_stalled_warning(self, go_server):
+        cmd = Monitor(go_server, 'Stalled-Pipeline', warn_run_time=10)
+        cmd.pipeline.history.return_value = dict(
+            pipelines=[self._scheduled_pipeline()]
+        )
+        result = cmd.run()
+
+        assert result['output'].startswith('WARNING: Pipeline "Stalled-Pipeline" stalled at')
+        assert result['exit_code'] == 1
+
+    def test_determines_pipeline_has_stalled_critical(self, go_server):
+        cmd = Monitor(go_server, 'Stalled-Pipeline', warn_run_time=10, crit_run_time=15)
+        cmd.pipeline.history.return_value = dict(
+            pipelines=[self._scheduled_pipeline(scheduled_minutes_back=20)]
+        )
+        result = cmd.run()
+
+        assert result['output'].startswith('CRITICAL: Pipeline "Stalled-Pipeline" stalled at')
+        assert result['exit_code'] == 2
+
+    def test_determines_pipeline_is_successful(self, go_server):
+        cmd = Monitor(go_server, 'Green-Pipeline')
+        cmd.pipeline.history.return_value = dict(
+            pipelines=[self._green_pipeline()]
+        )
+        result = cmd.run()
+
+        assert result['output'] == 'OK: Successful'
+        assert result['exit_code'] == 0
+
+    def test_determine_pipeline_is_failed(self, go_server):
+        cmd = Monitor(go_server, 'Red-Pipeline')
+        cmd.pipeline.history.return_value = dict(
+            pipelines=[self._red_pipeline()]
+        )
+        result = cmd.run()
+
+        assert result['output'].startswith('CRITICAL: Pipeline "Red-Pipeline" failed')
+        assert result['exit_code'] == 2
+
+    def test_pipeline_is_building(self, go_server):
+        """
+        When pipeline state isn't Passed or Failed the pipeline should
+        be assumed to be in progress.
+        """
+        cmd = Monitor(go_server, 'Currently-Building')
+        cmd.pipeline.history.return_value = dict(
+            pipelines=[self._building_pipeline()]
+        )
+        result = cmd.run()
+
+        assert result['output'].startswith('OK: Successful')

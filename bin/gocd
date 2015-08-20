@@ -57,4 +57,13 @@ if __name__ == '__main__':
     else:
         command, subcommand = sys.argv[1:3]
         server = utils.get_go_server()
-        utils.get_command(server, *sys.argv[1:]).run()
+        result = utils.get_command(server, *sys.argv[1:]).run()
+
+        # TODO: Add some tests for this, when the integration suite is in place \o/
+        response = getattr(result, 'get', None)
+        if response:
+            exit_code = response('exit_code', 0)
+            output_obj = sys.stderr if exit_code > 0 else sys.stdout
+
+            print(response('output', 0), file=output_obj)
+            exit(exit_code)
