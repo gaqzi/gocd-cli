@@ -36,7 +36,7 @@ clean-coverage-html:
 clean: clean-pyc clean-build clean-coverage-html
 
 lint-rst:
-	rst-lint README.rst
+	rst-lint README.rst CHANGELOG.rst
 
 lint-pep8:
 	flake8 gocd_cli tests
