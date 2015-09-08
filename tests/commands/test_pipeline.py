@@ -156,6 +156,23 @@ class TestMonitor(object):
     def _red_pipeline(self):
         return self._pipeline(result='Failed')
 
+    def _running_pipeline_with_unscheduled_stage(self):
+        pipeline = self._pipeline(result='Unknown', job_state='Building')
+        pipeline['stages'].append(dict(
+            scheduled=False,
+            jobs=[],
+            name="drop_migrate",
+            can_run=False,
+            operate_permission=True,
+            approval_type=None,
+            counter="1",
+            approved_by=None,
+            rerun_of_counter=None,
+            id=0,
+        ))
+
+        return pipeline
+
     def test_determines_pipeline_has_stalled_warning(self, go_server):
         cmd = Monitor(go_server, 'Stalled-Pipeline', warn_run_time=10)
         cmd.pipeline.history.return_value = dict(
@@ -204,6 +221,15 @@ class TestMonitor(object):
         cmd = Monitor(go_server, 'Currently-Building')
         cmd.pipeline.history.return_value = dict(
             pipelines=[self._building_pipeline()]
+        )
+        result = cmd.run()
+
+        assert result['output'].startswith('OK: Successful')
+
+    def test_pipeline_is_building_and_has_stages_that_arent_scheduled(self, go_server):
+        cmd = Monitor(go_server, 'Currently-Building')
+        cmd.pipeline.history.return_value = dict(
+            pipelines=[self._running_pipeline_with_unscheduled_stage()]
         )
         result = cmd.run()
 

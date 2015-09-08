@@ -150,8 +150,8 @@ class Monitor(BaseCommand):
                     'critical'
                 )
             elif stage.get('result', None) == 'Unknown' and stage['scheduled']:
-                # if not stage['jobs']:  # Add test for no jobs scheduled yet
-                #     continue
+                if not stage['jobs']:
+                    continue
 
                 in_progress_jobs = next(
                     (job for job in stage['jobs'] if job['state'] not in self.final_job_states),
