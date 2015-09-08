@@ -161,12 +161,14 @@ class Monitor(BaseCommand):
                     currently_running = True
 
                 scheduled_at = min(map(lambda job: job['scheduled_date'], stage['jobs'])) / 1000
+                scheduled_at = min(map(lambda job: job['scheduled_date'], stage['jobs']))
                 running_since.append(scheduled_at)
 
                 if (not started_at and scheduled_at) or started_at > scheduled_at:
                     started_at = scheduled_at
             elif stage['jobs']:
                 scheduled_at = min(map(lambda job: job['scheduled_date'], stage['jobs'])) / 1000
+                scheduled_at = min(map(lambda job: job['scheduled_date'], stage['jobs']))
                 if not started_at or started_at > scheduled_at:
                     started_at = scheduled_at
 
@@ -178,8 +180,8 @@ class Monitor(BaseCommand):
                 return self._return_value(
                     'Pipeline "{0}" stalled at "{1}", running for {2} seconds'.format(
                         self.name,
-                        datetime.fromtimestamp(self._now).strftime('%Y-%m-%dT%H:%M:%S'),
-                        current_run_time
+                        self._current_timestamp(),
+                        current_run_time / 1000
                     ),
                     'critical' if current_run_time >= self._crit_time else 'warning'
                 )
@@ -193,17 +195,17 @@ class Monitor(BaseCommand):
     @property
     def _now(self):
         if not self.__now:
-            self.__now = time.time()
+            self.__now = time.time() * 1000
 
         return self.__now
 
     @property
     def _warn_time(self):
-        return self.warn_run_time * 60
+        return self.warn_run_time * 60 * 1000
 
     @property
     def _crit_time(self):
-        return self.crit_run_time * 60
+        return self.crit_run_time * 60 * 1000
 
     @property
     def ran_after(self):
@@ -220,3 +222,6 @@ class Monitor(BaseCommand):
             output='{status}: {message}'.format(status=exit_status.upper(), message=message),
             exit_code=exit_code,
         )
+
+    def _current_timestamp(self):
+        return datetime.fromtimestamp(self._now / 1000).strftime('%Y-%m-%dT%H:%M:%S')

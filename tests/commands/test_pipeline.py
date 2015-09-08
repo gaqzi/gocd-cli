@@ -234,3 +234,11 @@ class TestMonitor(object):
         result = cmd.run()
 
         assert result['output'].startswith('OK: Successful')
+
+    def test_now_is_in_milliseconds(self, go_server):
+        cmd = Monitor(go_server, 'Currently-Building')
+        cmd.pipeline.history.return_value = dict(
+            pipelines=[self._green_pipeline()]
+        )
+
+        assert (cmd._now - time.time()) >= 1000
