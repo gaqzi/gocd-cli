@@ -125,7 +125,7 @@ class Monitor(BaseCommand):
     usage_summary = 'Check whether a pipeline has run successfully'
     __now = None
 
-    final_job_states = ['Passed', 'Failed']
+    final_job_states = ['Passed', 'Failed']  # States when a job/stage isn't doing anything more
 
     def __init__(self, server, name, ran_after=None, warn_run_time=30, crit_run_time=60):
         self.name = name
@@ -160,14 +160,12 @@ class Monitor(BaseCommand):
                 if in_progress_jobs:
                     currently_running = True
 
-                scheduled_at = min(map(lambda job: job['scheduled_date'], stage['jobs'])) / 1000
                 scheduled_at = min(map(lambda job: job['scheduled_date'], stage['jobs']))
                 running_since.append(scheduled_at)
 
                 if (not started_at and scheduled_at) or started_at > scheduled_at:
                     started_at = scheduled_at
-            elif stage['jobs']:
-                scheduled_at = min(map(lambda job: job['scheduled_date'], stage['jobs'])) / 1000
+            elif stage['jobs']:  # Has jobs but isn't scheduled, means it has finished running
                 scheduled_at = min(map(lambda job: job['scheduled_date'], stage['jobs']))
                 if not started_at or started_at > scheduled_at:
                     started_at = scheduled_at
