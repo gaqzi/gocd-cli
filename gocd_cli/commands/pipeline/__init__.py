@@ -134,45 +134,43 @@ class Monitor(BaseCommand):
         self.warn_run_time = warn_run_time
         self.crit_run_time = crit_run_time
 
+        self.currently_running = False
+        self.running_since = []
+        self._started_at = None
+
     def run(self):
         response = self.pipeline.history()
         if not response:
             raise Exception('Cannot continue like this. Response was invalid!')
 
-        last_run = response['pipelines'][0]
-        currently_running = False
-        running_since = []
-        started_at = None
-        for stage in last_run['stages']:
-            if stage.get('result', None) == 'Failed':
-                return self._return_value(
-                    'Pipeline "{0}" failed'.format(self.name),
-                    'critical'
-                )
-            elif stage.get('result', None) == 'Unknown' and stage['scheduled']:
-                if not stage['jobs']:
-                    continue
+        for stage in response['pipelines'][0]['stages']:
+            stage_result = stage.get('result', None)
 
-                in_progress_jobs = next(
-                    (job for job in stage['jobs'] if job['state'] not in self.final_job_states),
-                    False
-                )
-                if in_progress_jobs:
-                    currently_running = True
-
-                scheduled_at = min(map(lambda job: job['scheduled_date'], stage['jobs']))
-                running_since.append(scheduled_at)
-
-                if (not started_at and scheduled_at) or started_at > scheduled_at:
-                    started_at = scheduled_at
+            if stage_result == 'Failed':
+                return self._return_value('Pipeline "{0}" failed'.format(self.name), 'critical')
+            elif stage_result == 'Unknown' and stage['scheduled'] and stage['jobs']:
+                self._process_currently_running_stage(stage)
             elif stage['jobs']:  # Has jobs but isn't scheduled, means it has finished running
-                scheduled_at = min(map(lambda job: job['scheduled_date'], stage['jobs']))
-                if not started_at or started_at > scheduled_at:
-                    started_at = scheduled_at
+                scheduled_at = self._get_earliest('scheduled_date', stage)
+                self._update_started_at(scheduled_at)
 
-        if currently_running:
-            longest_running = min(running_since)
-            current_run_time = self._now - longest_running
+        return self._current_pipeline_state()
+
+    def _process_currently_running_stage(self, stage):
+        if not self.currently_running:
+            self.currently_running = next(
+                (True for job in stage['jobs'] if job['state'] not in self.final_job_states),
+                False
+            )
+
+        scheduled_at = self._get_earliest('scheduled_date', stage)
+        self.running_since.append(scheduled_at)
+        self._update_started_at(scheduled_at)
+
+    def _current_pipeline_state(self):
+        if self.currently_running:
+            longest_running = min(self.running_since)
+            current_run_time = (self._now - longest_running)
 
             if current_run_time >= self._warn_time:
                 return self._return_value(
@@ -185,7 +183,7 @@ class Monitor(BaseCommand):
                 )
             else:
                 return self._return_value('Successful')
-        elif started_at >= self.ran_after:
+        elif self.started_at >= self.ran_after:
             pass
         else:
             return self._return_value('Successful')
@@ -209,6 +207,10 @@ class Monitor(BaseCommand):
     def ran_after(self):
         return ''
 
+    @property
+    def started_at(self):
+        return self._started_at
+
     def _return_value(self, message, exit_status='ok'):
         exit_code = 0
         if exit_status == 'warning':
@@ -223,3 +225,12 @@ class Monitor(BaseCommand):
 
     def _current_timestamp(self):
         return datetime.fromtimestamp(self._now / 1000).strftime('%Y-%m-%dT%H:%M:%S')
+
+    def _get_earliest(self, time_key, stage):
+        return min(map(lambda job: job[time_key], stage['jobs']))
+
+    def _update_started_at(self, scheduled_at):
+        if not self._started_at or self._started_at > scheduled_at:
+            self._started_at = scheduled_at
+
+        return self.started_at
