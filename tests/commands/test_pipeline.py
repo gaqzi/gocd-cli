@@ -1,12 +1,11 @@
-from datetime import datetime, timedelta
-import json
-import os
 import pytest
-from mock import MagicMock
+import time
 
+from datetime import datetime, timedelta
 from gocd import Server
 from gocd.api import Pipeline
-import time
+from mock import MagicMock
+
 from gocd_cli.commands.pipeline import Monitor, Pause, Trigger, Unlock, Unpause
 
 
