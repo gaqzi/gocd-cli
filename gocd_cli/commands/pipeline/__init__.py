@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+import datetime as dt
 from gocd_cli.command import BaseCommand
 
 from .retrigger_failed import RetriggerFailed
@@ -124,13 +124,14 @@ class Monitor(BaseCommand):
     """
     usage_summary = 'Check whether a pipeline has run successfully'
     __now = None
+    _ran_after = None
 
     final_job_states = ['Passed', 'Failed']  # States when a job/stage isn't doing anything more
 
     def __init__(self, server, name, ran_after=None, warn_run_time=30, crit_run_time=60):
         self.name = name
         self.pipeline = server.pipeline(name)
-        self._ran_after = ran_after
+        self.ran_after = ran_after
         self.warn_run_time = warn_run_time
         self.crit_run_time = crit_run_time
 
@@ -183,8 +184,11 @@ class Monitor(BaseCommand):
                 )
             else:
                 return self._return_value('Successful')
-        elif self.started_at >= self.ran_after:
-            pass
+        elif self.ran_after >= self.started_at:
+            return self._return_value('Pipeline "{0}" has not run after "{1}".'.format(
+                self.name,
+                self._format_timestamp(self.ran_after)
+            ), 'critical')
         else:
             return self._return_value('Successful')
 
@@ -205,7 +209,26 @@ class Monitor(BaseCommand):
 
     @property
     def ran_after(self):
-        return ''
+        return self._ran_after
+
+    @ran_after.setter
+    def ran_after(self, value):
+        if not value:
+            return
+
+        now = dt.datetime.fromtimestamp(self._now / 1000)
+        val = dt.time(*map(lambda x: int(x), value.split(':')))
+        val = dt.datetime.now().replace(
+            hour=val.hour,
+            minute=val.minute,
+            second=val.second,
+            microsecond=val.microsecond
+        )
+
+        if now >= val:
+            self._ran_after = time.mktime(val.timetuple()) * 1000
+        else:
+            self._ran_after = time.mktime((val - dt.timedelta(days=1)).timetuple()) * 1000
 
     @property
     def started_at(self):
@@ -224,7 +247,10 @@ class Monitor(BaseCommand):
         )
 
     def _current_timestamp(self):
-        return datetime.fromtimestamp(self._now / 1000).strftime('%Y-%m-%dT%H:%M:%S')
+        return self._format_timestamp(self._now)
+
+    def _format_timestamp(self, unix_timestamp):
+        return dt.datetime.fromtimestamp(unix_timestamp / 1000).strftime('%Y-%m-%dT%H:%M:%S')
 
     def _get_earliest(self, time_key, stage):
         return min(map(lambda job: job[time_key], stage['jobs']))

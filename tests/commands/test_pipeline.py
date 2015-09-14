@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import json
 import os
 import pytest
@@ -115,7 +116,7 @@ class TestUnpause(object):
 
 class TestMonitor(object):
     def _pipeline(self, result='Unknown', job_state='Scheduled', scheduled_minutes_back=20):
-        scheduled_date = time.time() - (60 * scheduled_minutes_back)
+        scheduled_date = time.time() - (60 * (scheduled_minutes_back or 20))
 
         return {
             'stages': [
@@ -147,8 +148,11 @@ class TestMonitor(object):
     def _scheduled_pipeline(self, scheduled_minutes_back=20):
         return self._pipeline(result='Unknown', scheduled_minutes_back=scheduled_minutes_back)
 
-    def _green_pipeline(self):
-        return self._pipeline(result='Passed')
+    def _green_pipeline(self, scheduled_at=None):
+        if scheduled_at:
+            scheduled_at = divmod(int(time.time() - time.mktime(scheduled_at.timetuple())), 60)[0]
+
+        return self._pipeline(result='Passed', scheduled_minutes_back=scheduled_at)
 
     def _building_pipeline(self):
         return self._pipeline(result='Unknown', job_state='Building')
@@ -242,3 +246,64 @@ class TestMonitor(object):
         )
 
         assert (cmd._now - time.time()) >= 1000
+
+    def test_determine_pipeline_has_run_after_given_time_in_the_past(self, go_server):
+        scheduled_at = datetime.now() - timedelta(hours=1)
+        scheduled_at = scheduled_at.replace(minute=0, second=0, microsecond=0)
+
+        cmd = Monitor(go_server, 'Run-After-Time', ran_after=scheduled_at.strftime('%H:%M'))
+        cmd.pipeline.history.return_value = dict(
+            pipelines=[self._green_pipeline(scheduled_at=scheduled_at + timedelta(minutes=1))]
+        )
+        result = cmd.run()
+
+        assert result['output'].startswith('OK: Successful')
+
+    def test_determine_pipeline_has_run_after_given_time_in_the_past_failed(self, go_server):
+        scheduled_at = datetime.now() - timedelta(hours=1)
+        scheduled_at = scheduled_at.replace(minute=0, second=0, microsecond=0)
+
+        cmd = Monitor(go_server, 'Run-After-Time', ran_after=scheduled_at.strftime('%H:%M'))
+        cmd.pipeline.history.return_value = dict(
+            pipelines=[self._green_pipeline(scheduled_at=scheduled_at - timedelta(minutes=1))]
+        )
+        result = cmd.run()
+
+        assert result['output'] == 'CRITICAL: Pipeline "{0}" has not run after "{1}".'.format(
+            cmd.name,
+            cmd._format_timestamp(cmd.ran_after)
+        )
+
+    def test_determine_pipeline_has_run_after_given_time_in_the_future(self, go_server):
+        # This is to say we want it to run at 14:00 and it's currently 13:15, then it should be
+        # check if it ran after that time since yesterday.
+        scheduled_at = datetime.now() + timedelta(hours=1)
+        scheduled_at = scheduled_at.replace(minute=0, second=0, microsecond=0)
+
+        cmd = Monitor(go_server, 'Run-After-Time', ran_after=scheduled_at.strftime('%H:%M'))
+        cmd.pipeline.history.return_value = dict(
+            pipelines=[self._green_pipeline(
+                scheduled_at=scheduled_at - timedelta(hours=23, minutes=59, seconds=30)
+            )]
+        )
+        result = cmd.run()
+
+        assert result['output'].startswith('OK: Successful')
+
+    def test_determine_pipeline_has_run_after_given_time_in_the_future_failed(self, go_server):
+        # This should've run after the given time yesterday but hasn't
+        scheduled_at = datetime.now() + timedelta(hours=1)
+        scheduled_at = scheduled_at.replace(minute=0, second=0, microsecond=0)
+
+        cmd = Monitor(go_server, 'Run-After-Time', ran_after=scheduled_at.strftime('%H:%M'))
+        cmd.pipeline.history.return_value = dict(
+            pipelines=[self._green_pipeline(
+                scheduled_at=scheduled_at - timedelta(days=1, hours=2)
+            )]
+        )
+        result = cmd.run()
+
+        assert result['output'] == 'CRITICAL: Pipeline "{0}" has not run after "{1}".'.format(
+            cmd.name,
+            cmd._format_timestamp(cmd.ran_after)
+        )
