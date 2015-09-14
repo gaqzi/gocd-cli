@@ -173,10 +173,22 @@ class TestMonitor(object):
 
         return pipeline
 
-    def test_determines_pipeline_has_stalled_warning(self, go_server):
-        cmd = Monitor(go_server, 'Stalled-Pipeline', warn_run_time=10)
+    def _monitor(self, go_server, pipeline_name, pipeline, **kwargs):
+        cmd = Monitor(go_server, pipeline_name, **kwargs)
         cmd.pipeline.history.return_value = dict(
-            pipelines=[self._scheduled_pipeline()]
+            pipelines=[pipeline]
+        )
+        return cmd
+
+    def _snap_to_hour(self, timestamp):
+        return timestamp.replace(minute=0, second=0, microsecond=0)
+
+    def test_determines_pipeline_has_stalled_warning(self, go_server):
+        cmd = self._monitor(
+            go_server,
+            'Stalled-Pipeline',
+            self._scheduled_pipeline(),
+            warn_run_time=10
         )
         result = cmd.run()
 
@@ -184,9 +196,12 @@ class TestMonitor(object):
         assert result['exit_code'] == 1
 
     def test_determines_pipeline_has_stalled_critical(self, go_server):
-        cmd = Monitor(go_server, 'Stalled-Pipeline', warn_run_time=10, crit_run_time=15)
-        cmd.pipeline.history.return_value = dict(
-            pipelines=[self._scheduled_pipeline(scheduled_minutes_back=20)]
+        cmd = self._monitor(
+            go_server,
+            'Stalled-Pipeline',
+            self._scheduled_pipeline(scheduled_minutes_back=20),
+            warn_run_time=10,
+            crit_run_time=15
         )
         result = cmd.run()
 
@@ -194,20 +209,14 @@ class TestMonitor(object):
         assert result['exit_code'] == 2
 
     def test_determines_pipeline_is_successful(self, go_server):
-        cmd = Monitor(go_server, 'Green-Pipeline')
-        cmd.pipeline.history.return_value = dict(
-            pipelines=[self._green_pipeline()]
-        )
+        cmd = self._monitor(go_server, 'Green-Pipeline', self._green_pipeline())
         result = cmd.run()
 
         assert result['output'] == 'OK: Successful'
         assert result['exit_code'] == 0
 
     def test_determine_pipeline_is_failed(self, go_server):
-        cmd = Monitor(go_server, 'Red-Pipeline')
-        cmd.pipeline.history.return_value = dict(
-            pipelines=[self._red_pipeline()]
-        )
+        cmd = self._monitor(go_server, 'Red-Pipeline', self._red_pipeline())
         result = cmd.run()
 
         assert result['output'].startswith('CRITICAL: Pipeline "Red-Pipeline" failed')
@@ -218,50 +227,47 @@ class TestMonitor(object):
         When pipeline state isn't Passed or Failed the pipeline should
         be assumed to be in progress.
         """
-        cmd = Monitor(go_server, 'Currently-Building')
-        cmd.pipeline.history.return_value = dict(
-            pipelines=[self._building_pipeline()]
-        )
+        cmd = self._monitor(go_server, 'Currently-Building', self._building_pipeline())
         result = cmd.run()
 
         assert result['output'].startswith('OK: Successful')
 
     def test_pipeline_is_building_and_has_stages_that_arent_scheduled(self, go_server):
-        cmd = Monitor(go_server, 'Currently-Building')
-        cmd.pipeline.history.return_value = dict(
-            pipelines=[self._running_pipeline_with_unscheduled_stage()]
+        cmd = self._monitor(
+            go_server,
+            'Currently-Building',
+            self._running_pipeline_with_unscheduled_stage()
         )
         result = cmd.run()
 
         assert result['output'].startswith('OK: Successful')
 
     def test_now_is_in_milliseconds(self, go_server):
-        cmd = Monitor(go_server, 'Currently-Building')
-        cmd.pipeline.history.return_value = dict(
-            pipelines=[self._green_pipeline()]
-        )
+        cmd = self._monitor(go_server, 'Whatever', self._green_pipeline())
 
         assert (cmd._now - time.time()) >= 1000
 
     def test_determine_pipeline_has_run_after_given_time_in_the_past(self, go_server):
-        scheduled_at = datetime.now() - timedelta(hours=1)
-        scheduled_at = scheduled_at.replace(minute=0, second=0, microsecond=0)
+        scheduled_at = self._snap_to_hour(datetime.now() - timedelta(hours=1))
 
-        cmd = Monitor(go_server, 'Run-After-Time', ran_after=scheduled_at.strftime('%H:%M'))
-        cmd.pipeline.history.return_value = dict(
-            pipelines=[self._green_pipeline(scheduled_at=scheduled_at + timedelta(minutes=1))]
+        cmd = self._monitor(
+            go_server,
+            'Run-After-Time',
+            self._green_pipeline(scheduled_at=scheduled_at + timedelta(minutes=1)),
+            ran_after=scheduled_at.strftime('%H:%M')
         )
         result = cmd.run()
 
         assert result['output'].startswith('OK: Successful')
 
     def test_determine_pipeline_has_run_after_given_time_in_the_past_failed(self, go_server):
-        scheduled_at = datetime.now() - timedelta(hours=1)
-        scheduled_at = scheduled_at.replace(minute=0, second=0, microsecond=0)
+        scheduled_at = self._snap_to_hour(datetime.now() - timedelta(hours=1))
 
-        cmd = Monitor(go_server, 'Run-After-Time', ran_after=scheduled_at.strftime('%H:%M'))
-        cmd.pipeline.history.return_value = dict(
-            pipelines=[self._green_pipeline(scheduled_at=scheduled_at - timedelta(minutes=1))]
+        cmd = self._monitor(
+            go_server,
+            'Run-After-Time',
+            self._green_pipeline(scheduled_at=scheduled_at - timedelta(minutes=1)),
+            ran_after=scheduled_at.strftime('%H:%M')
         )
         result = cmd.run()
 
@@ -273,14 +279,15 @@ class TestMonitor(object):
     def test_determine_pipeline_has_run_after_given_time_in_the_future(self, go_server):
         # This is to say we want it to run at 14:00 and it's currently 13:15, then it should be
         # check if it ran after that time since yesterday.
-        scheduled_at = datetime.now() + timedelta(hours=1)
-        scheduled_at = scheduled_at.replace(minute=0, second=0, microsecond=0)
+        scheduled_at = self._snap_to_hour(datetime.now() + timedelta(hours=1))
 
-        cmd = Monitor(go_server, 'Run-After-Time', ran_after=scheduled_at.strftime('%H:%M'))
-        cmd.pipeline.history.return_value = dict(
-            pipelines=[self._green_pipeline(
+        cmd = self._monitor(
+            go_server,
+            'Run-After-Time',
+            self._green_pipeline(
                 scheduled_at=scheduled_at - timedelta(hours=23, minutes=59, seconds=30)
-            )]
+            ),
+            ran_after=scheduled_at.strftime('%H:%M')
         )
         result = cmd.run()
 
@@ -288,14 +295,13 @@ class TestMonitor(object):
 
     def test_determine_pipeline_has_run_after_given_time_in_the_future_failed(self, go_server):
         # This should've run after the given time yesterday but hasn't
-        scheduled_at = datetime.now() + timedelta(hours=1)
-        scheduled_at = scheduled_at.replace(minute=0, second=0, microsecond=0)
+        scheduled_at = self._snap_to_hour(datetime.now() + timedelta(hours=1))
 
-        cmd = Monitor(go_server, 'Run-After-Time', ran_after=scheduled_at.strftime('%H:%M'))
-        cmd.pipeline.history.return_value = dict(
-            pipelines=[self._green_pipeline(
-                scheduled_at=scheduled_at - timedelta(days=1, hours=2)
-            )]
+        cmd = self._monitor(
+            go_server,
+            'Run-After-Time',
+            self._green_pipeline(scheduled_at=scheduled_at - timedelta(days=1, hours=2)),
+            ran_after=scheduled_at.strftime('%H:%M')
         )
         result = cmd.run()
 
