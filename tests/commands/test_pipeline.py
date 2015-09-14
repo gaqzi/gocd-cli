@@ -81,36 +81,33 @@ class TestUnlock(object):
         self.cmd.pipeline.unlock.assert_called_with()
 
 
-class TestPause(object):
-    def test_pauses_when_unpaused(self, go_server):
-        cmd = Pause(go_server, 'Simple-Pipeline')
-        cmd.pipeline.status.return_value = dict(paused=False)
+class BasePause(object):
+    def _command(self, go_server, paused):
+        cmd = self.Command(go_server, 'Simple-Pipeline')
+        cmd.pipeline.status.return_value = dict(paused=paused)
         cmd.run()
 
-        cmd.pipeline.pause.assert_called_with()
+        return cmd
+
+
+class TestPause(BasePause):
+    Command = Pause
+
+    def test_pauses_when_unpaused(self, go_server):
+        self._command(go_server, paused=False).pipeline.pause.assert_called_with()
 
     def test_doesnt_run_if_already_paused(self, go_server):
-        cmd = Pause(go_server, 'Simple-Pipeline')
-        cmd.pipeline.status.return_value = dict(paused=True)
-        cmd.run()
-
-        assert not cmd.pipeline.pause.called
+        assert not self._command(go_server, True).pipeline.pause.called
 
 
-class TestUnpause(object):
+class TestUnpause(BasePause):
+    Command = Unpause
+
     def test_unpauses_when_paused(self, go_server):
-        cmd = Unpause(go_server, 'Simple-Pipeline')
-        cmd.pipeline.status.return_value = dict(paused=True)
-        cmd.run()
-
-        cmd.pipeline.unpause.assert_called_with()
+        self._command(go_server, paused=True).pipeline.unpause.assert_called_with()
 
     def test_doesnt_run_if_already_unpaused(self, go_server):
-        cmd = Unpause(go_server, 'Simple-Pipeline')
-        cmd.pipeline.status.return_value = dict(paused=False)
-        cmd.run()
-
-        assert not cmd.pipeline.unpause.called
+        assert not self._command(go_server, paused=False).pipeline.unpause.called
 
 
 class TestMonitor(object):
