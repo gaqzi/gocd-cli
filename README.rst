@@ -73,6 +73,9 @@ which is made available through the ``help`` command.
     usage: gocd <command> <subcommand> [<posarg1>, ...] [--kwarg1=value, ...]
     Commands:
        pipeline
+          check: Check whether a pipeline has run successfully
+          check-all: Checks all pipelines to be green/non-stalled
+          list: Lists all pipelines with their current status
           pause: Pauses the named pipeline
           retrigger-failed: Retrigger a pipeline/stage that has failed
           trigger: Triggers the named pipeline
