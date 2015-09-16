@@ -4,7 +4,16 @@ from gocd_cli.utils import get_settings
 from .check import Check
 from .retrigger_failed import RetriggerFailed
 
-__all__ = ['Check', 'CheckAll', 'Pause', 'RetriggerFailed', 'Trigger', 'Unlock', 'Unpause']
+__all__ = [
+    'Check',
+    'CheckAll',
+    'List',
+    'Pause',
+    'RetriggerFailed',
+    'Trigger',
+    'Unlock',
+    'Unpause',
+]
 
 
 def unlock_pipeline(pipeline):
@@ -153,3 +162,23 @@ class CheckAll(BaseCommand):
             return self._return_value('\n'.join(self.error_messages), self.exit_code)
         else:
             return self._return_value('OK: All green', self.OK_STATUS)
+
+
+class List(BaseCommand):
+    usage = ' '
+    usage_summary = 'Lists all pipelines with their current status'
+
+    def __init__(self, server):
+        self.server = server
+
+    def run(self):
+        for pipeline in self.server.pipeline_groups().pipelines:
+            status = self.server.pipeline(pipeline).status()
+            if not status:
+                print 'Error getting status for "{0}"'.format(pipeline)
+                exit(3)
+
+            print '{0}: {1}'.format(pipeline, self._format_status(status.payload))
+
+    def _format_status(self, status):
+        return ', '.join(('{0}={1}'.format(k, v) for k, v in status.items()))
