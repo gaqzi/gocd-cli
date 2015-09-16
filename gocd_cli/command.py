@@ -50,3 +50,9 @@ class BaseCommand(object):
             args=' '.join('<{0}>'.format(arg) for arg in args),
             kwargs=' '.join('[--{0}]'.format(arg.replace('_', '-')) for arg in kwargs),
         ).strip()
+
+    def _return_value(self, output, exit_code):
+        return dict(
+            exit_code=exit_code,
+            output=output,
+        )
