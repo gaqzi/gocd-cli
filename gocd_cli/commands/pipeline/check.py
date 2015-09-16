@@ -2,15 +2,19 @@ import datetime as dt
 import time
 from gocd_cli.command import BaseCommand
 
-__all__ = ['Monitor']
+__all__ = ['Check']
 
 
-class Monitor(BaseCommand):
+class Check(BaseCommand):
     usage = """
     Checks whether a pipeline has run after a given time, finished successfully,
     and warns if it has been running for a long time.
 
     The alerting codes corresponds to the same in Nagios.
+
+    Note:
+        If a pipeline is paused it's assumed to currently not be in use and the
+         status will be set to unknown.
 
     Flags:
         ran_after: A time today for which the script should've run
@@ -24,6 +28,7 @@ class Monitor(BaseCommand):
         0: Everything is green
         1: When there's a warning
         2: When there's a critical warning
+        3: When the pipeline is paused
     """
     usage_summary = 'Check whether a pipeline has run successfully'
     __now = None
@@ -31,18 +36,27 @@ class Monitor(BaseCommand):
 
     final_job_states = ['Passed', 'Failed']  # States when a job/stage isn't doing anything more
 
-    def __init__(self, server, name, ran_after=None, warn_run_time=30, crit_run_time=60):
+    def __init__(self, server, name, ran_after=None, warn_run_time=30, crit_run_time=60,
+                 ignore_paused=False):
         self.name = name
         self.pipeline = server.pipeline(name)
         self.ran_after = ran_after
         self.warn_run_time = warn_run_time
         self.crit_run_time = crit_run_time
+        self.ignore_paused = ignore_paused
 
         self.currently_running = False
         self.running_since = []
         self._started_at = None
 
     def run(self):
+        if not self.ignore_paused:
+            status = self.pipeline.status()
+            if not status:
+                raise Exception('Cannot continue like this. Response was invalid!')
+            elif status['paused']:
+                return self._return_value('Pipeline "{0}" is paused'.format(self.name), 'unknown')
+
         response = self.pipeline.history()
         if not response:
             raise Exception('Cannot continue like this. Response was invalid!')
@@ -51,7 +65,13 @@ class Monitor(BaseCommand):
             stage_result = stage.get('result', None)
 
             if stage_result == 'Failed':
-                return self._return_value('Pipeline "{0}" failed'.format(self.name), 'critical')
+                return self._return_value(
+                    'Pipeline "{0}" failed (scheduled at "{1}")'.format(
+                        self.name,
+                        self._format_timestamp(stage['jobs'][0]['scheduled_date'])
+                    ),
+                    'critical'
+                )
             elif stage_result == 'Unknown' and stage['scheduled'] and stage['jobs']:
                 self._process_currently_running_stage(stage)
             elif stage['jobs']:  # Has jobs but isn't scheduled, means it has finished running
@@ -143,10 +163,12 @@ class Monitor(BaseCommand):
             exit_code = 1
         elif exit_status == 'critical':
             exit_code = 2
+        elif exit_status == 'unknown':
+            exit_code = 3
 
-        return dict(
-            output='{status}: {message}'.format(status=exit_status.upper(), message=message),
-            exit_code=exit_code,
+        return super(Check, self)._return_value(
+            '{status}: {message}'.format(status=exit_status.upper(), message=message),
+            exit_code,
         )
 
     def _current_timestamp(self):

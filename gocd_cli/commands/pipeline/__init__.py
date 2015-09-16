@@ -1,9 +1,9 @@
 from gocd_cli.command import BaseCommand
 
-from .monitor import Monitor
+from .check import Check
 from .retrigger_failed import RetriggerFailed
 
-__all__ = ['Monitor', 'Pause', 'RetriggerFailed', 'Trigger', 'Unlock', 'Unpause']
+__all__ = ['Check', 'Pause', 'RetriggerFailed', 'Trigger', 'Unlock', 'Unpause']
 
 
 def unlock_pipeline(pipeline):
