@@ -14,7 +14,8 @@ class Check(BaseCommand):
 
     Note:
         If a pipeline is paused it's assumed to currently not be in use and the
-         status will be set to unknown.
+        status will be set to unknown. This can be changed by setting ignore_paused
+        to true.
 
     Flags:
         ran_after: A time today for which the script should've run
@@ -23,6 +24,8 @@ class Check(BaseCommand):
             running for longer than this warn
         crit_run_time: If it has been for running longer than this many
             minutes raise a critical warning
+        ignore_paused: When true a paused pipeline will be checked as
+            normal, when false it'll be set to unknown. Default: False
 
     Exits:
         0: Everything is green
