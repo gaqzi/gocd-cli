@@ -1,9 +1,10 @@
 from gocd_cli.command import BaseCommand
+from gocd_cli.utils import get_settings
 
 from .check import Check
 from .retrigger_failed import RetriggerFailed
 
-__all__ = ['Check', 'Pause', 'RetriggerFailed', 'Trigger', 'Unlock', 'Unpause']
+__all__ = ['Check', 'CheckAll', 'Pause', 'RetriggerFailed', 'Trigger', 'Unlock', 'Unpause']
 
 
 def unlock_pipeline(pipeline):
@@ -99,3 +100,56 @@ class Unpause(BaseCommand):
             return self.pipeline.unpause()
         else:
             return False
+
+
+class CheckAll(BaseCommand):
+    usage = """
+    Checks that all pipelines except those explicitly ignored are green
+    and not stalled.
+
+    Configuration is done in by the check_all section of the
+    gocd-cli.cfg.
+
+    For usage of the flags and return statuses see the check command.
+    """
+    usage_summary = 'Checks all pipelines to be green/non-stalled'
+
+    exit_code = 0
+    error_messages = []
+
+    OK_STATUS = 0
+    PAUSED_STATUS = 3
+
+    def __init__(self, server, warn_run_time=30, crit_run_time=60, skip_paused=True):
+        self.config = get_settings('check_all')
+        self.server = server
+        self.crit_run_time = crit_run_time
+        self.warn_run_time = warn_run_time
+        self.skip_paused = skip_paused
+
+    def run(self):
+        ignored_pipelines = (self.config.get('ignored_pipelines') or '').split(',')
+        for pipeline in self.server.pipeline_groups().pipelines:
+            if pipeline in ignored_pipelines:
+                continue
+
+            response = Check(
+                self.server,
+                pipeline,
+                warn_run_time=self.warn_run_time,
+                crit_run_time=self.crit_run_time,
+            ).run()
+            if response['exit_code'] != self.OK_STATUS:
+                if self.skip_paused and response['exit_code'] == self.PAUSED_STATUS:
+                    continue
+
+                if(response['exit_code'] != self.PAUSED_STATUS
+                   and response['exit_code'] > self.exit_code):
+                    self.exit_code = response['exit_code']
+
+                self.error_messages.append(response['output'])
+
+        if self.exit_code != self.OK_STATUS:
+            return self._return_value('\n'.join(self.error_messages), self.exit_code)
+        else:
+            return self._return_value('OK: All green', self.OK_STATUS)
