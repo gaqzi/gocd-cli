@@ -182,3 +182,57 @@ class List(BaseCommand):
 
     def _format_status(self, status):
         return ', '.join(('{0}={1}'.format(k, v) for k, v in status.items()))
+
+
+class GetArtifact(BaseCommand):
+    usage = ' '
+    usage_summary = 'Gets a named artifact from a stage/job'
+
+    final_job_states = ['Passed', 'Failed']  # States when a job/stage isn't doing anything more
+
+    def __init__(self, server, name, stage, filename, save_to='.', job=None, counter=None):
+        self.server = server
+        self.name = name
+        self.stage = stage
+        self.filename = filename
+        self.save_to = save_to
+        self.job = job
+        self.counter = counter
+
+        self.pipeline = self.server.pipeline(name)
+
+    def run(self):
+        pipeline_run = self._get_run()
+        stage = next(
+            (stage for stage in pipeline_run['stages'] if stage['name'] == self.stage),
+            None
+        )
+        if not stage['result'] in self.final_job_states:
+            return self._return_value(
+                'Stage {0} is "{1}", it needs to be in a final state to download a file'.format(
+                    self.name,
+                    self.stage
+                ),
+                1
+            )
+
+
+        #
+        # if pipeline_run['result'] not in self.final_job_states:
+        #
+
+        # pipeline_run['status']
+
+
+    def _get_run(self):
+        if self.counter is None:
+            response = self.pipeline.history()
+            if not response:
+                raise Exception('Cannot continue like this. Response was invalid!')
+
+            last_run = response['pipelines'][0]
+            self.counter = last_run['counter']
+
+            return last_run
+        else:
+            return self.pipeline.instance(self.counter)
