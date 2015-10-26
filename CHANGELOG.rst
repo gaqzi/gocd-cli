@@ -2,8 +2,8 @@
 Change Log
 ==========
 
-0.9.0 - 2015-xx-yy
-==================
+`0.9.0`_ - 2015-10-26
+=====================
 
 **Added**
 
@@ -71,6 +71,7 @@ Changed
 
 Nothing much to say here, initial public release. :)
 
+.. _`0.9.0`: https://github.com/gaqzi/gocd-cli/compare/v0.8.0...v0.9.0
 .. _`0.8.0`: https://github.com/gaqzi/gocd-cli/compare/v0.7.1...v0.8.0
 .. _`0.7.1`: https://github.com/gaqzi/gocd-cli/compare/v0.7.0.3...v0.7.1
 .. _`0.7.0.3`: https://github.com/gaqzi/gocd-cli/releases/tag/v0.7.0.3
