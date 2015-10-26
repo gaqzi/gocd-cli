@@ -46,12 +46,19 @@ class Encrypt(BaseCommand, BaseEncryptionCommand):
         else:
             return self._plaintext
 
-    def run(self):
-        ciphertext = self.encryption_module.encrypt(self.plaintext or '')
-        print('encryption_module = {0}'.format(self.encryption_module.__name__))
-        print('{0} = {1}'.format(self._key or 'Ciphertext', ciphertext))
+    def label(self):
+        if self._key:
+            return '{0}_encrypted'.format(self._key.replace('_encrypted', ''))
+        else:
+            return 'Ciphertext'
 
-        return ciphertext
+    def run(self):
+        ciphertext = self.encryption_module.encrypt(self.plaintext)
+
+        return self._return_value('{0}\n{1}'.format(
+            'encryption_module = {0}'.format(self.encryption_module.__name__),
+            '{0} = {1}'.format(self.label(), ciphertext)
+        ), exit_code=0)
 
 
 class Decrypt(BaseCommand, BaseEncryptionCommand):
@@ -74,9 +81,16 @@ class Decrypt(BaseCommand, BaseEncryptionCommand):
         else:
             return self._ciphertext
 
+    def label(self):
+        if self._key:
+            return self._key.replace('_encrypted', '')
+        else:
+            return 'Plaintext'
+
     def run(self):
         plaintext = self.encryption_module.decrypt(self.ciphertext)
-        print('encryption_module = {0}'.format(self.encryption_module.__name__))
-        print('{0} = {1}'.format(self._key or 'Plaintext', plaintext))
 
-        return plaintext
+        return self._return_value('{0}\n{1}'.format(
+            'encryption_module = {0}'.format(self.encryption_module.__name__),
+            '{0} = {1}'.format(self.label(), plaintext),
+        ), exit_code=0)

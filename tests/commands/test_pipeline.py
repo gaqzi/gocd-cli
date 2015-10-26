@@ -2,6 +2,7 @@ import pytest
 import time
 
 from datetime import datetime, timedelta
+
 from gocd import Server
 from gocd.api import Pipeline
 from mock import MagicMock
