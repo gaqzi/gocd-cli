@@ -132,6 +132,38 @@ Example:
   GOCD_USER=admin
   GOCD_PASSWORD=badger
 
+**Encrypted configuration keys**
+
+From version 0.9 there's support for encrypted configuration keys.
+There's a builtin module for Rot13, or `Caesar cipher`_, as well as
+a standalone module using `blowfish`_ called `gocd-cli.encryption.blowfish`_.
+
+This feature was added to handle a very specific use case, where the
+password to the Go server was not allowed to be stored in plaintext. But
+it was okay if the decryption key was stored on the same machine. The
+builtin implementation is to be seen as a reference implementation and
+not to be used. But then again, if you just need it to not be plaintext…
+
+**Usage**
+
+To then encrypt the current plaintext password do:
+
+.. code-block:: shell
+
+    $ gocd settings encrypt --key password
+    encryption_module = gocd_cli.encryption.caesar
+    password_encrypted = fhcre frperg
+
+Copy these two values into your ``~/.gocd/gocd-cli.cfg`` file and remove
+the old ``password`` and next time it'll use the encrypted password instead.
+
+To decrypt:
+
+.. code-block:: shell
+
+    $ gocd settings decrypt --key password
+    encryption_module = gocd_cli.encryption.caesar
+    password = super secret
 
 Writing your own commands
 -------------------------
@@ -179,3 +211,6 @@ more information about each command ask for help on each in turn.
 .. _`Go Continuous Delivery`: http://go.cd/
 .. _namespaced packages: http://pythonhosted.org/setuptools/setuptools.html#namespace-packages
 .. _gocd-cli.commands.echo: https://github.com/gaqzi/gocd-cli.commands.echo
+.. _Caesar cipher: https://en.wikipedia.org/wiki/Caesar_cipher
+.. _gocd-cli.encryption.blowfish: https://github.com/gaqzi/gocd-cli.encryption.blowfish
+.. _blowfish: https://en.wikipedia.org/wiki/Blowfish_(cipher)
