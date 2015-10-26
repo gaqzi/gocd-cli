@@ -35,6 +35,15 @@ def ini_settings_no_section():
 
 
 @pytest.fixture
+def settings_encrypted():
+    return Settings(
+        prefix='GOCD',
+        section='gocd',
+        filename=path.join(path.dirname(__file__), 'support/gocd-cli-encrypted-password.cfg')
+    )
+
+
+@pytest.fixture
 def env_settings():
     return EnvironmentSettings(prefix='GOCD')
 
@@ -96,3 +105,8 @@ def test_settings_should_return_none_when_nothing_anywhere(settings, monkeypatch
     monkeypatch.delenv('GOCD_NONEXISTENT', raising=False)
 
     assert settings.get('nonexistent') is None
+
+
+def test_settings_looks_for_encrypted_version_when_encryption_module_set(settings_encrypted):
+    assert settings_encrypted.get('password') == 'super secret'
+    assert settings_encrypted.get('user') == 'ba'

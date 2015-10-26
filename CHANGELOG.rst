@@ -2,6 +2,30 @@
 Change Log
 ==========
 
+0.9.0 - 2015-xx-yy
+==================
+
+**Added**
+
+* encryption support for configuration values
+
+  Keys ending in ``_encrypted`` will be decrypted using the encryption module
+  ``encryption_module``. This was added as a requirement from a client where
+  the password may not be stored in plain text, but it is fine to have it
+  stored on the same computer. The default `Caesar`_ module is not
+  recommended for production use.
+
+  For a module with a better encryption see `gocd-cli.encryption.blowfish`_.
+
+* settings decrypt/encrypt
+
+  Decrypts/encrypts string or settings in the settings file.
+
+  **Note** does not store changes in the settings file.
+
+.. _Caesar: https://en.wikipedia.org/wiki/Caesar_cipher
+.. _gocd-cli.encryption.blowfish: https://github.com/gaqzi/gocd-cli.encryption.blowfish
+
 0.8.1 - 2015-09-16
 ==================
 

@@ -41,7 +41,7 @@ setup(
     long_description=README,
     version=version(),
     packages=find_packages(exclude=('tests',)),
-    namespace_packages=('gocd_cli', 'gocd_cli.commands',),
+    namespace_packages=('gocd_cli', 'gocd_cli.commands', 'gocd_cli.encryption'),
     cmdclass={'test': PyTest},
     scripts=('bin/gocd',),
     install_requires=[

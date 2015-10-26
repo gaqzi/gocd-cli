@@ -68,7 +68,40 @@ class EnvironmentSettings(BaseSettings):
             return val
 
 
-class Settings(EnvironmentSettings, IniSettings):
+class EncryptedSettings(BaseSettings):
+    """Will look for, and decrypt, encrypted values for keys if
+    encryption module is set. The encryption module will be dynamically
+    imported and giving the password to the module has to happen out
+    of band.
+
+    This relies on being able to get the ciphertext from the other
+    methods of retrieving configuration values. Therefore it has to be
+    listed first in the mixed in class.
+    """
+    encryption_module = False
+
+    def __init__(self, **kwargs):
+        super(EncryptedSettings, self).__init__(**kwargs)
+
+        encryption_module = self.get('encryption_module')
+        if encryption_module:
+            mod = __import__(encryption_module, fromlist=('',))
+            if mod:
+                self.encryption_module = mod
+
+    def get(self, option):
+        if self.encryption_module:
+            val = super(EncryptedSettings, self).get('{0}_encrypted'.format(option))
+            if val:
+                return self._decrypt(val)
+
+        return super(EncryptedSettings, self).get(option)
+
+    def _decrypt(self, val):
+        return self.encryption_module.decrypt(val)
+
+
+class Settings(EncryptedSettings, EnvironmentSettings, IniSettings):
     def __init__(self, prefix, section, filename=None):
         """Will try to read configuration from environment variables and ini
         files, if no value found in either of those ``None`` is
