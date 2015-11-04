@@ -1,4 +1,5 @@
 import os
+import pwd
 
 import pytest
 from mock import MagicMock, patch
@@ -89,7 +90,7 @@ class TestIsFileReadable(object):
 
     def test_expands_home_directory(self, monkeypatch):
         path = '~/test-random-0123'
-        expanded_path = os.path.expanduser(path)
+        expanded_path = gocd_cli.utils.expand_user(path)
 
         monkeypatch.setattr(os.path, 'isfile', lambda p: True if p == expanded_path else False)
         monkeypatch.setattr(os, 'access', lambda p, _: True if p == expanded_path else False)
@@ -165,3 +166,20 @@ class TestGetGoServer(object):
 
         assert go_server.host == settings.get('server')
         assert go_server.user == settings.get('user')
+
+
+class TestExpandUser(object):
+    def test_path_that_doesnt_start_with_tilde_returns_path(self):
+        assert gocd_cli.utils.expand_user('/tmp') == '/tmp'
+
+    def test_expand_home_to_current_users_home_instead_of_the_one_set_in_home(self, monkeypatch):
+        monkeypatch.setenv('HOME', 'clearlyfake')
+        user = pwd.getpwuid(os.geteuid())
+
+        assert gocd_cli.utils.expand_user('~/tmp') == '{0}/tmp'.format(user.pw_dir)
+
+    def test_if_os_is_not_posix_then_fall_back_to_os_expanduser(self, monkeypatch):
+        monkeypatch.setenv('HOME', 'c:\\clearlyfake')
+        monkeypatch.setattr('os.name', 'nt')
+
+        assert gocd_cli.utils.expand_user('~/tmp/') == 'c:\\clearlyfake/tmp/'

@@ -1,7 +1,8 @@
 import os.path
+import pkgutil
+import pwd
 import re
 import string
-import pkgutil
 
 from gocd_cli import commands
 from gocd_cli.settings import Settings
@@ -30,8 +31,31 @@ def get_command_module(command):  # TODO: rename this function, I just don't kno
     return __import__('gocd_cli.commands.{0}'.format(command), fromlist=(str(command),))
 
 
+def expand_user(path):
+    """Expands ~/path to /home/<current_user>/path
+
+    On POSIX systems does it by getting the home directory for the
+    current effective user from the passwd database. On other systems
+    do it by using :func:`os.path.expanduser`
+
+    Args:
+        path (str): A path to expand to a user's home folder
+
+    Returns:
+        str: expanded path
+    """
+    if not path.startswith('~'):
+        return path
+
+    if os.name == 'posix':
+        user = pwd.getpwuid(os.geteuid())
+        return path.replace('~', user.pw_dir, 1)
+    else:
+        return os.path.expanduser(path)
+
+
 def is_file_readable(path):
-    path = os.path.expanduser(path)
+    path = expand_user(path)
     return os.path.isfile(path) and os.access(path, os.R_OK)
 
 
@@ -122,7 +146,7 @@ def get_settings(section='gocd', settings_paths=('~/.gocd/gocd-cli.cfg', '/etc/g
 
     config_file = next((path for path in settings_paths if is_file_readable(path)), None)
     if config_file:
-        config_file = os.path.expanduser(config_file)
+        config_file = expand_user(config_file)
 
     return Settings(prefix=section, section=section, filename=config_file)
 
