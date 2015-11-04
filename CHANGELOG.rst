@@ -2,6 +2,19 @@
 Change Log
 ==========
 
+`0.9.1`_ - 2015-11-06
+=====================
+
+**Changed**
+
+* Expand user home path from the passwd db on POSIX systems.
+
+  This fixes bug `#8`_
+
+* Any output from the cli will go to STDOUT
+
+.. _#8: https://github.com/gaqzi/gocd-cli/issues/8
+
 `0.9.0`_ - 2015-10-26
 =====================
 
@@ -71,6 +84,7 @@ Changed
 
 Nothing much to say here, initial public release. :)
 
+.. _`0.9.1`: https://github.com/gaqzi/gocd-cli/compare/v0.9.0...v0.9.1
 .. _`0.9.0`: https://github.com/gaqzi/gocd-cli/compare/v0.8.0...v0.9.0
 .. _`0.8.0`: https://github.com/gaqzi/gocd-cli/compare/v0.7.1...v0.8.0
 .. _`0.7.1`: https://github.com/gaqzi/gocd-cli/compare/v0.7.0.3...v0.7.1
