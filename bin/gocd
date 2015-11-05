@@ -63,7 +63,6 @@ if __name__ == '__main__':
         response = getattr(result, 'get', None)
         if response:
             exit_code = response('exit_code', 0)
-            output_obj = sys.stderr if exit_code > 0 else sys.stdout
 
-            print(response('output', 0), file=output_obj)
+            print(response('output', 0))
             exit(exit_code)
