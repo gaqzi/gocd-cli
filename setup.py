@@ -45,7 +45,7 @@ setup(
     cmdclass={'test': PyTest},
     scripts=('bin/gocd',),
     install_requires=[
-        'gocd>=0.8.0,<1.0',
+        'gocd>=0.10.0,<1.0',
     ],
     tests_require=[
         'pytest',

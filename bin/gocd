@@ -64,5 +64,7 @@ if __name__ == '__main__':
         if response:
             exit_code = response('exit_code', 0)
 
-            print(response('output', 0))
+            output = response('output', False)
+            if output:
+                print(output)
             exit(exit_code)

@@ -52,6 +52,9 @@ class BaseCommand(object):
         ).strip()
 
     def _return_value(self, output, exit_code):
+        if isinstance(exit_code, bool):
+            exit_code = 0 if exit_code else 2
+
         return dict(
             exit_code=exit_code,
             output=output,

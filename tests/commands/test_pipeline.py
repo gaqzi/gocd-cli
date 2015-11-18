@@ -1,12 +1,9 @@
 import pytest
 import time
-
 from datetime import datetime, timedelta
-
 from gocd import Server
 from gocd.api import Pipeline
 from mock import MagicMock
-
 from gocd_cli.commands.pipeline import Check, Pause, Trigger, Unlock, Unpause
 
 
@@ -24,7 +21,11 @@ class TestTrigger(object):
         cmd.run()
 
         go_server.pipeline.assert_called_once_with('Simple-Pipeline')
-        cmd.pipeline.schedule.assert_called_once_with(variables=None, secure_variables=None)
+        cmd.pipeline.schedule.assert_called_once_with(
+            variables=None,
+            secure_variables=None,
+            return_new_instance=False
+        )
 
     def test_tries_to_unlock_the_pipeline_if_asked(self, go_server):
         cmd = Trigger(go_server, 'Simple-Pipeline', unlock=True)
@@ -46,7 +47,8 @@ class TestTrigger(object):
 
         cmd.pipeline.schedule.assert_called_once_with(
             variables=dict(PIPELINE='The-Matrix'),
-            secure_variables=None
+            secure_variables=None,
+            return_new_instance=False,
         )
 
     def test_trigger_with_secure_variables(self, go_server):
@@ -55,8 +57,25 @@ class TestTrigger(object):
 
         cmd.pipeline.schedule.assert_called_once_with(
             variables=None,
-            secure_variables=dict(PASSCODE='Mellon')
+            secure_variables=dict(PASSCODE='Mellon'),
+            return_new_instance=False,
         )
+
+# I'll do this in integration instead
+# class TestTriggerAndWaitUntilFinished(object):
+#     def test_triggers_pipeline_and_waits_until_all_stages_have_finished(self, go_server):
+#         cmd = Trigger(go_server, 'Simple-Pipeline', wait_until_finished=True)
+#         output = cmd.run()
+#
+#         go_server.pipeline.assert_called_once_with('Simple-Pipeline')
+#         cmd.pipeline.schedule.assert_called_once_with(
+#             variables=None,
+#             secure_variables=None,
+#             return_new_instance=True
+#         )
+#
+#         assert output['exit_code'] == 0
+#         assert output['output'] == "I'm so output, I'll blow your mind"
 
 
 class TestUnlock(object):
