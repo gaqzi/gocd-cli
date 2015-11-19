@@ -56,7 +56,7 @@ class Check(BaseCommand):
         if not self.ignore_paused:
             status = self.pipeline.status()
             if not status:
-                raise Exception('Cannot continue like this. Response was invalid!')
+                raise Exception('Invalid response! "{0}"'.format(status.body))
             elif status['paused']:
                 return self._return_value('Pipeline "{0}" is paused'.format(self.name), 'unknown')
 
