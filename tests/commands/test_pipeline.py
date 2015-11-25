@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from gocd import Server
 from gocd.api import Pipeline
 from mock import MagicMock
+from gocd.api.response import Response
 from gocd_cli.commands.pipeline import Check, Pause, Trigger, Unlock, Unpause
 
 
@@ -138,7 +139,7 @@ class TestMonitor(object):
     def _pipeline(self, result='Unknown', job_state='Scheduled', scheduled_minutes_back=20):
         scheduled_date = time.time() - (60 * (scheduled_minutes_back or 20))
 
-        return {
+        return Response._from_json({
             'stages': [
                 {
                     'scheduled': True,
@@ -163,7 +164,7 @@ class TestMonitor(object):
                 }
             ],
             'result': result
-        }
+        })
 
     def _scheduled_pipeline(self, scheduled_minutes_back=20):
         return self._pipeline(result='Unknown', scheduled_minutes_back=scheduled_minutes_back)
@@ -200,9 +201,7 @@ class TestMonitor(object):
     def _check(self, pipeline_name, pipeline, **kwargs):
         cmd = Check(self.go_server, pipeline_name, **kwargs)
         cmd.pipeline.status.return_value = dict(paused=False)  # XXX: is this a bad idea?
-        cmd.pipeline.history.return_value = dict(
-            pipelines=[pipeline]
-        )
+        cmd.pipeline.instance.return_value = pipeline
         return cmd
 
     def _snap_to_hour(self, timestamp):
@@ -328,3 +327,13 @@ class TestMonitor(object):
 
         assert result['exit_code'] == 3
         assert result['output'] == 'UNKNOWN: Pipeline "{0}" is paused'.format(cmd.name)
+
+    def test_no_instances_of_pipeline_run_yet_and_ran_after_is_none(self):
+        cmd = self._check('Never-Run', Response._from_json({}))
+
+        assert cmd.run()['output'].startswith('OK: No scheduled runs')
+
+    def test_no_instances_of_pipeline_run_yet_and_ran_after_is_set(self):
+        cmd = self._check('Never-Run', Response._from_json({}), ran_after='18:00')
+
+        self._assert_critical_run_after(cmd)

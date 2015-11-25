@@ -17,6 +17,13 @@ Change Log
 
       $ gocd pipeline trigger Simple-Pipeline --wait_until_finished=true
 
+**Changed**
+
+* Pipeline monitor will not raise an exception when trying to monitor
+  a pipeline that hasn't been run before. It'll instead be treated
+  as Ok or Critical depending on whether it was supposed to have been
+  scheduled or not.
+
 `0.9.1`_ - 2015-11-06
 =====================
 

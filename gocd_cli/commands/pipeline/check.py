@@ -60,11 +60,16 @@ class Check(BaseCommand):
             elif status['paused']:
                 return self._return_value('Pipeline "{0}" is paused'.format(self.name), 'unknown')
 
-        response = self.pipeline.history()
-        if not response:
-            raise Exception('Cannot continue like this. Response was invalid!')
+        instance = self.pipeline.instance()
+        if not instance:
+            raise Exception('Invalid response! "{0}"'.format(instance.body))
+        elif not instance.body:  # No instance available, i.e. pipeline has never been scheduled
+            if self.ran_after:
+                return self._return_ran_after_fail()
+            else:
+                return self._return_value('No scheduled runs', 'ok')
 
-        for stage in response['pipelines'][0]['stages']:
+        for stage in instance['stages']:
             stage_result = stage.get('result', None)
 
             if stage_result == 'Failed':
@@ -111,10 +116,7 @@ class Check(BaseCommand):
             else:
                 return self._return_value('Successful')
         elif self.ran_after >= self.started_at:
-            return self._return_value('Pipeline "{0}" has not run after "{1}".'.format(
-                self.name,
-                self._format_timestamp(self.ran_after)
-            ), 'critical')
+            return self._return_ran_after_fail()
         else:
             return self._return_value('Successful')
 
@@ -188,3 +190,9 @@ class Check(BaseCommand):
             self._started_at = scheduled_at
 
         return self.started_at
+
+    def _return_ran_after_fail(self):
+        return self._return_value('Pipeline "{0}" has not run after "{1}".'.format(
+            self.name,
+            self._format_timestamp(self.ran_after)
+        ), 'critical')
