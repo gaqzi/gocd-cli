@@ -151,7 +151,7 @@ def get_settings(section='gocd', settings_paths=('~/.gocd/gocd-cli.cfg', '/etc/g
     return Settings(prefix=section, section=section, filename=config_file)
 
 
-def get_go_server(settings=None):
+def get_go_server(settings=None, verbose=False):
     """Returns a `gocd.Server` configured by the `settings`
     object.
 
@@ -169,4 +169,5 @@ def get_go_server(settings=None):
         settings.get('server'),
         user=settings.get('user'),
         password=settings.get('password'),
+        request_debug_level=1 if verbose else 0
     )
