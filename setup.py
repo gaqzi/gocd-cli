@@ -2,6 +2,8 @@
 # -*- encoding: utf-8 -*-
 import os
 import sys
+import tomllib
+from pathlib import Path
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
@@ -26,8 +28,12 @@ class PyTest(TestCommand):
 
 
 def version():
-    import gocd_cli
-    return gocd_cli.__version__
+    pyproject = Path(__file__).parent / "pyproject.toml"
+    with pyproject.open("rb") as f:
+        return tomllib.load(f)["project"]["version"]
+
+    # import gocd_cli
+    # return gocd_cli.__version__
 
 README = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
 

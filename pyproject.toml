@@ -1,0 +1,6 @@
+[project]
+name = "gocd-cli"
+version = "1.0.0"
+dependencies = [
+    "gocd @ git+https://github.com/santoshbachar/py-gocd.git@master"
+]
