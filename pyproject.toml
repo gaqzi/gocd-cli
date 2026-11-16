@@ -6,6 +6,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "gocd-cli"
 version = "1.0.0"
+description = "A CLI client for interacting with Go Continuous Delivery"
+readme = "README.rst"
+requires-python = "==3.12.12"
+license = "MIT"
+authors = [
+    { name = "Björn Andersson" }
+]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Development Status :: 4 - Beta",
