@@ -1,6 +1,18 @@
+
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "gocd-cli"
 version = "1.0.0"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.12",
+]
 dependencies = [
     "gocd @ git+https://github.com/santoshbachar/py-gocd.git@master"
 ]
