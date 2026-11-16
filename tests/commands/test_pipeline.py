@@ -25,7 +25,9 @@ class TestTrigger(object):
         cmd.pipeline.schedule.assert_called_once_with(
             variables=None,
             secure_variables=None,
-            return_new_instance=False
+            return_new_instance=False,
+            maximum_backoff_time=23_400,
+            backoff_time=1
         )
 
     def test_tries_to_unlock_the_pipeline_if_asked(self, go_server):
@@ -50,6 +52,8 @@ class TestTrigger(object):
             variables=dict(PIPELINE='The-Matrix'),
             secure_variables=None,
             return_new_instance=False,
+            maximum_backoff_time=23_400,
+            backoff_time=1
         )
 
     def test_trigger_with_secure_variables(self, go_server):
@@ -60,6 +64,8 @@ class TestTrigger(object):
             variables=None,
             secure_variables=dict(PASSCODE='Mellon'),
             return_new_instance=False,
+            maximum_backoff_time=23_400,
+            backoff_time=1
         )
 
 # I'll do this in integration instead
