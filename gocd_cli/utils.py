@@ -167,6 +167,7 @@ def get_go_server(settings=None):
 
     return gocd.Server(
         settings.get('server'),
+        pat=settings.get('pat'),
         user=settings.get('user'),
         password=settings.get('password'),
         log_file=settings.get('log_file')
